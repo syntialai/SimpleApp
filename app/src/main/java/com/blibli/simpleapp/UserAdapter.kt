@@ -10,10 +10,9 @@ import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 
-class UserAdapter(
-    private val users: ArrayList<User>
-) : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
+class UserAdapter : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
 
+    private var users: ArrayList<User> = arrayListOf()
     private lateinit var onItemClickCallback: OnItemClickCallback
 
     fun setOnItemClickedCallback(onItemClickCallback: OnItemClickCallback) {
@@ -48,6 +47,11 @@ class UserAdapter(
     }
 
     override fun getItemCount(): Int = users.size
+
+    fun updateList(userslist: ArrayList<User>) {
+        users = userslist
+        notifyDataSetChanged()
+    }
 
     inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvUserName: MaterialTextView = view.findViewById(R.id.tv_user_name)

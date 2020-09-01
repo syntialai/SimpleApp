@@ -30,21 +30,18 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager2
 
-    private lateinit var service: UserService
     private var username = ""
     private var data: User? = null
-    private var following: ArrayList<User> = ArrayList()
-    private var followers: ArrayList<User> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
-        service = RetrofitClient.createService()
-
         initView()
         getUsernameIntent()
         fetchData()
+        setupViewPager()
+        setupTabs()
     }
 
     private fun initView() {
@@ -74,8 +71,8 @@ class DetailActivity : AppCompatActivity() {
 
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
-                    0 -> UserFragment.newInstance(1, following)
-                    else -> UserFragment.newInstance(1, followers)
+                    0 -> UserFragment.newInstance(1, 1, username)
+                    else -> UserFragment.newInstance(1, 2, username)
                 }
             }
         }
@@ -89,7 +86,7 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun fetchData() {
-        service
+        RetrofitClient.createService()
             .getUserByUsername(username)
             .enqueue(object : Callback<User> {
                 override fun onResponse(
@@ -99,8 +96,6 @@ class DetailActivity : AppCompatActivity() {
                     if (response.isSuccessful) {
                         data = response.body() as User
 
-                        fetchFollowingData()
-                        fetchFollowersData()
                         putDataToUI()
                     } else {
                         Log.d(FETCH_USER_FAILED, response.toString())
@@ -134,51 +129,7 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchFollowingData() {
-        service.getUserByUsernameAndCategory(username, "following")
-            .enqueue(object: Callback<ArrayList<User>> {
-                override fun onResponse(
-                    call: Call<ArrayList<User>>,
-                    response: Response<ArrayList<User>>
-                ) {
-                    if (response.isSuccessful) {
-                        following = response.body() as ArrayList<User>
-                    } else {
-                        Log.d(FETCH_FOLLOWING_FAILED, response.toString())
-                    }
-                }
-
-                override fun onFailure(call: Call<ArrayList<User>>, t: Throwable) {
-                    Log.d(FETCH_FOLLOWING_FAILED, t.toString())
-                }
-            })
-    }
-
-    private fun fetchFollowersData() {
-        service.getUserByUsernameAndCategory(username, "followers")
-            .enqueue(object: Callback<ArrayList<User>> {
-                override fun onResponse(
-                    call: Call<ArrayList<User>>,
-                    response: Response<ArrayList<User>>
-                ) {
-                    if (response.isSuccessful) {
-                        followers = response.body() as ArrayList<User>
-                        setupViewPager()
-                        setupTabs()
-                    } else {
-                        Log.d(FETCH_FOLLOWERS_FAILED, response.toString())
-                    }
-                }
-
-                override fun onFailure(call: Call<ArrayList<User>>, t: Throwable) {
-                    Log.d(FETCH_FOLLOWERS_FAILED, t.toString())
-                }
-            })
-    }
-
     companion object {
         const val FETCH_USER_FAILED = "FETCH USER FAILED"
-        const val FETCH_FOLLOWING_FAILED = "FETCH FOLLOWING_FAILED"
-        const val FETCH_FOLLOWERS_FAILED = "FETCH FOLLOWERS_FAILED"
     }
 }

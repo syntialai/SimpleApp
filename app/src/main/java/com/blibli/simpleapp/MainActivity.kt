@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
                     hideKeyboard(svUser)
-                    searchData(it)
+                    showUserFragment(query)
                 }
                 return true
             }
@@ -38,31 +38,6 @@ class MainActivity : AppCompatActivity() {
                 return true
             }
         })
-    }
-
-    private fun searchData(query: String) {
-        RetrofitClient.createService()
-            .getUsers(query)
-            .enqueue(object: Callback<UserResponse> {
-                override fun onResponse(
-                    call: Call<UserResponse>,
-                    response: Response<UserResponse>
-                ) {
-                    if (response.isSuccessful) {
-                        val data = response.body() as UserResponse
-                        val usersList = data.items
-                        usersList?.let {
-                            showUserFragment(it)
-                        }
-                    } else {
-                        Log.d(SEARCH_FAILED, response.toString())
-                    }
-                }
-
-                override fun onFailure(call: Call<UserResponse>, t: Throwable) {
-                    Log.d(SEARCH_FAILED, t.toString())
-                }
-            })
     }
 
     private fun hideKeyboard(view: View) {
@@ -77,8 +52,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showUserFragment(usersList: ArrayList<User>) {
-        val userFragment = UserFragment.newInstance(1, usersList)
+    private fun showUserFragment(query: String) {
+        val userFragment = UserFragment.newInstance(1, 0, query)
 
         val fragmentManager: FragmentManager = supportFragmentManager
         val fragmentTransaction: FragmentTransaction = fragmentManager
@@ -88,9 +63,5 @@ class MainActivity : AppCompatActivity() {
             R.id.fl_container_users,
             userFragment
         ).addToBackStack(null).commit()
-    }
-
-    companion object {
-        const val SEARCH_FAILED = "SEARCH FAILED"
     }
 }
