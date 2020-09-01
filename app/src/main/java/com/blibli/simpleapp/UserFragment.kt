@@ -1,7 +1,7 @@
 package com.blibli.simpleapp
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.blibli.simpleapp.dummy.DummyContent
+import com.blibli.simpleapp.data.User
 
 class UserFragment : Fragment() {
 
@@ -22,10 +22,10 @@ class UserFragment : Fragment() {
 
         arguments?.let {
             columnCount = it.getInt(ARG_COLUMN_COUNT)
+            userList = it.getParcelableArrayList<User>(ARG_USER_LIST) as ArrayList<User>
         }
 
-        initData()
-        Log.d("FRAGMENT", userList.toString())
+//        initData()
     }
 
     override fun onCreateView(
@@ -45,27 +45,32 @@ class UserFragment : Fragment() {
 
         adapter.setOnItemClickedCallback(object: UserAdapter.OnItemClickCallback {
             override fun onItemClicked(data: User) {
-                // Do nothing
+                val intent = Intent(context, DetailActivity::class.java)
+                intent.putExtra(ARG_USER_NAME, data.login)
+                startActivity(intent)
             }
         })
 
         return view
     }
 
-    private fun initData() {
-        userList = arrayListOf(
-            User("Syntia", "https://avatars3.githubusercontent.com/u/53588149?v=4")
-        )
-    }
+//    private fun initData() {
+//        userList = arrayListOf(
+//            User("Syntia", "https://avatars3.githubusercontent.com/u/53588149?v=4")
+//        )
+//    }
 
     companion object {
-        const val ARG_COLUMN_COUNT = "column-count"
+        const val ARG_COLUMN_COUNT = "COLUMN_COUNT"
+        const val ARG_USER_LIST = "USER_LIST"
+        const val ARG_USER_NAME = "USER_NAME"
 
         @JvmStatic
-        fun newInstance(columnCount: Int) =
+        fun newInstance(columnCount: Int, userList: ArrayList<User>) =
             UserFragment().apply {
                 arguments = Bundle().apply {
                     putInt(ARG_COLUMN_COUNT, columnCount)
+                    putParcelableArrayList(ARG_USER_LIST, userList)
                 }
             }
     }

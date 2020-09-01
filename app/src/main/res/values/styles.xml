@@ -20,4 +20,14 @@
         <item name="textAppearanceButton">@style/TextAppearance.MaterialComponents.Button</item>
         <item name="textAppearanceOverline">@style/TextAppearance.MaterialComponents.Overline</item>
     </style>
+
+    <style name="imageView.cornered" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
+    <style name="imageView.rounded" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>

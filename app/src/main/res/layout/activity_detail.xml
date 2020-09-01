@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="@dimen/margin_4"
+    tools:context=".DetailActivity">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/iv_user_detail_image"
+        android:layout_width="@dimen/image_user_detail_size"
+        android:layout_height="@dimen/image_user_detail_size"
+        android:src="@drawable/ic_github"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearance="@style/imageView.rounded" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/tv_user_detail_username"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_4"
+        android:layout_marginTop="@dimen/margin_1"
+        android:layout_marginEnd="@dimen/margin_4"
+        android:text="@string/app_name"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        app:layout_constraintStart_toEndOf="@id/iv_user_detail_image"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/ll_repos"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_4"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintStart_toEndOf="@id/iv_user_detail_image"
+        app:layout_constraintTop_toBottomOf="@id/tv_user_detail_username">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tv_user_detail_repos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_2"
+            android:text="@string/number_label"
+            android:textAppearance="?attr/textAppearanceBody1"
+            android:textStyle="bold"
+            />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/repos_label"
+            android:textAppearance="?attr/textAppearanceBody2" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_followers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_4"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintStart_toEndOf="@id/ll_repos"
+        app:layout_constraintTop_toBottomOf="@id/tv_user_detail_username">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tv_user_detail_followers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_2"
+            android:text="@string/number_label"
+            android:textAppearance="?attr/textAppearanceBody1"
+            android:textStyle="bold"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/followers_label"
+            android:textAppearance="?attr/textAppearanceBody2" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_following"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin_4"
+        android:gravity="center"
+        android:orientation="vertical"
+        app:layout_constraintStart_toEndOf="@id/ll_followers"
+        app:layout_constraintTop_toBottomOf="@id/tv_user_detail_username">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tv_user_detail_following"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_2"
+            android:text="@string/number_label"
+            android:textAppearance="?attr/textAppearanceBody1"
+            android:textStyle="bold"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/following_label"
+            android:textAppearance="?attr/textAppearanceBody2" />
+
+    </LinearLayout>
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tab_users"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_8"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_user_detail_image" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewpager_user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tab_users" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

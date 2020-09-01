@@ -1,13 +1,10 @@
 package com.blibli.simpleapp
 
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
-
-import com.blibli.simpleapp.dummy.DummyContent.DummyItem
+import androidx.recyclerview.widget.RecyclerView
+import com.blibli.simpleapp.data.User
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.imageview.ShapeableImageView
@@ -33,10 +30,15 @@ class UserAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = users[position]
 
-        holder.tvUserName.text = item.username
+        holder.tvUserName.text = item.login
         Glide.with(holder.itemView.context)
-            .load(item.image)
-            .apply(RequestOptions().override(R.dimen.image_user_size, R.dimen.image_user_size))
+            .load(item.avatar_url)
+            .apply(
+                RequestOptions().override(
+                    holder.itemView.context.resources.getDimensionPixelSize(R.dimen.image_user_size),
+                    holder.itemView.context.resources.getDimensionPixelSize(R.dimen.image_user_size)
+                )
+            )
             .centerCrop()
             .into(holder.ivUserImage)
 
