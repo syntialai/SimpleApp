@@ -19,5 +19,5 @@ interface UserService {
     fun getUserByUsernameAndCategory(
         @Path("username") username: String,
         @Path("category") category: String
-    ): Observable<ArrayList<User>>
+    ): Observable<List<User>>
 }

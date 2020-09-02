@@ -108,7 +108,7 @@ class UserFragment : Fragment() {
                     }
 
                     override fun onNext(t: UserResponse) {
-                        t.items?.let { list -> userList = list }
+                        t.items?.let { list -> userList = list as ArrayList<User> }
                     }
 
                     override fun onError(e: Throwable) {
@@ -129,13 +129,13 @@ class UserFragment : Fragment() {
             call
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : Observer<ArrayList<User>> {
+                .subscribe(object : Observer<List<User>> {
                     override fun onSubscribe(d: Disposable) {
                         disposable = d
                     }
 
-                    override fun onNext(t: ArrayList<User>) {
-                        userList = t
+                    override fun onNext(t: List<User>) {
+                        userList = t as ArrayList<User>
                     }
 
                     override fun onError(e: Throwable) {
@@ -155,13 +155,13 @@ class UserFragment : Fragment() {
             call
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : Observer<ArrayList<User>> {
+                .subscribe(object : Observer<List<User>> {
                     override fun onSubscribe(d: Disposable) {
                         disposable = d
                     }
 
-                    override fun onNext(t: ArrayList<User>) {
-                        userList = t
+                    override fun onNext(t: List<User>) {
+                        userList = t as ArrayList<User>
                     }
 
                     override fun onError(e: Throwable) {

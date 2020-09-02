@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-kapt'
 
 android {
     compileSdkVersion 29
@@ -49,12 +50,17 @@ dependencies {
 
     // Glide
     implementation 'com.github.bumptech.glide:glide:4.11.0'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
 
     // Retrofit
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+
+    // Converter
     implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
+    implementation 'com.squareup.retrofit2:converter-jackson:2.6.0'
+    implementation 'com.squareup.retrofit2:converter-moshi:2.6.0'
+
+    implementation "com.fasterxml.jackson.module:jackson-module-kotlin:2.11.0"
 
     // RxJava
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'

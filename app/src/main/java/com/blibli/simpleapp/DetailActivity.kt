@@ -64,7 +64,7 @@ class DetailActivity : AppCompatActivity() {
 
     private fun setupTabs() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = when(position) {
+            tab.text = when (position) {
                 0 -> resources.getString(R.string.following_label)
                 else -> resources.getString(R.string.followers_label)
             }
@@ -72,7 +72,7 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun setupViewPager() {
-        viewPager.adapter = object: FragmentStateAdapter(this) {
+        viewPager.adapter = object : FragmentStateAdapter(this) {
 
             override fun getItemCount(): Int = 2
 

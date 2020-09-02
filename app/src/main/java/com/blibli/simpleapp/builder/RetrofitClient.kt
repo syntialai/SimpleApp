@@ -1,23 +1,37 @@
 package com.blibli.futurekotlin.builder
 
 import com.blibli.simpleapp.service.UserService
+import com.squareup.moshi.Moshi
 import io.reactivex.schedulers.Schedulers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.jackson.JacksonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
+
 
 object RetrofitClient {
-    const val BASE_URL = "https://api.github.com/"
+    private const val BASE_URL = "https://api.github.com/"
     private var client: OkHttpClient
     private var rxAdapter: RxJava2CallAdapterFactory
+
+    // GSON
+    private val gsonConverter = GsonConverterFactory.create()
+
+    // Jackson
+    private val jacksonConverter = JacksonConverterFactory.create()
+
+    // Moshi
+    private val moshi = Moshi.Builder().build()
+    private val moshiConverter = MoshiConverterFactory.create(moshi)
 
     init {
         val interceptor = Interceptor { chain ->
             val request = chain.request().newBuilder().addHeader(
                 "Authorization",
-                "token d7bcad1075285585c5562cde72df4a85963fb02b"
+                "token 8cc409e10334e3b1f2d7aac50ae490aa4e0965bc"
             ).build()
             chain.proceed(request)
         }
@@ -33,7 +47,7 @@ object RetrofitClient {
     fun createService(): UserService {
         val retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(gsonConverter)
             .addCallAdapterFactory(rxAdapter)
             .client(client)
             .build()
