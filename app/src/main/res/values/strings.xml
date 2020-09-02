@@ -5,4 +5,5 @@
     <string name="number_label">5</string>
     <string name="followers_label">Followers</string>
     <string name="repos_label">Repositories</string>
+    <string name="empty_users">No Users</string>
 </resources>

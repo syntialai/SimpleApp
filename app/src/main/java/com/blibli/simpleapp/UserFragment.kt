@@ -3,20 +3,22 @@ package com.blibli.simpleapp
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import com.blibli.futurekotlin.builder.RetrofitClient
 import com.blibli.simpleapp.data.User
 import com.blibli.simpleapp.response.UserResponse
 import com.blibli.simpleapp.service.UserService
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.google.android.material.textview.MaterialTextView
+import io.reactivex.Observer
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 
 class UserFragment : Fragment() {
 
@@ -26,8 +28,10 @@ class UserFragment : Fragment() {
 
     private var userList = ArrayList<User>()
     private var adapter = UserAdapter()
+    private var disposable: Disposable? = null
 
     private lateinit var rvUsers: RecyclerView
+    private lateinit var tvNoUsers: MaterialTextView
     private lateinit var service: UserService
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,6 +53,7 @@ class UserFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_users, container, false)
 
+        tvNoUsers = view.findViewById(R.id.tv_no_users)
         rvUsers = view.findViewById(R.id.rv_users)
         rvUsers.layoutManager = when {
             columnCount <= 1 -> LinearLayoutManager(context)
@@ -56,7 +61,7 @@ class UserFragment : Fragment() {
         }
         rvUsers.adapter = adapter
 
-        adapter.setOnItemClickedCallback(object: UserAdapter.OnItemClickCallback {
+        adapter.setOnItemClickedCallback(object : UserAdapter.OnItemClickCallback {
             override fun onItemClicked(data: User) {
                 val intent = Intent(context, DetailActivity::class.java)
                 intent.putExtra(ARG_USER_NAME, data.login)
@@ -67,8 +72,20 @@ class UserFragment : Fragment() {
         return view
     }
 
+    override fun onDestroy() {
+        disposable?.dispose()
+        Log.d("isDisposed", disposable?.isDisposed.toString())
+        super.onDestroy()
+    }
+
     private fun setAdapter() {
         adapter.updateList(userList)
+        showRecyclerView(userList.size > 0)
+    }
+
+    private fun showRecyclerView(show: Boolean) {
+        rvUsers.visibility = if (show) View.VISIBLE else View.GONE
+        tvNoUsers.visibility = if (show) View.GONE else View.VISIBLE
     }
 
     private fun initData() {
@@ -80,28 +97,26 @@ class UserFragment : Fragment() {
     }
 
     private fun fetchSearchResults() {
-        username?.let {
-            service
-                .getUsers(it)
-                .enqueue(object: Callback<UserResponse> {
-                    override fun onResponse(
-                        call: Call<UserResponse>,
-                        response: Response<UserResponse>
-                    ) {
-                        if (response.isSuccessful) {
-                            val data = response.body() as UserResponse
-                            val usersList = data.items
-                            usersList?.let {
-                                userList = it
-                                setAdapter()
-                            }
-                        } else {
-                            Log.d(SEARCH_FAILED, response.toString())
-                        }
+        username?.let { username ->
+            val call = service.getUsers(username)
+            call
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Observer<UserResponse> {
+                    override fun onSubscribe(d: Disposable) {
+                        disposable = d
                     }
 
-                    override fun onFailure(call: Call<UserResponse>, t: Throwable) {
-                        Log.d(SEARCH_FAILED, t.toString())
+                    override fun onNext(t: UserResponse) {
+                        t.items?.let { list -> userList = list }
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Log.d(SEARCH_FAILED, e.toString())
+                    }
+
+                    override fun onComplete() {
+                        setAdapter()
                     }
                 })
         }
@@ -109,22 +124,26 @@ class UserFragment : Fragment() {
 
     private fun fetchFollowingData() {
         username?.let {
-            service.getUserByUsernameAndCategory(it, "following")
-                .enqueue(object: Callback<ArrayList<User>> {
-                    override fun onResponse(
-                        call: Call<ArrayList<User>>,
-                        response: Response<ArrayList<User>>
-                    ) {
-                        if (response.isSuccessful) {
-                            userList = response.body() as ArrayList<User>
-                            setAdapter()
-                        } else {
-                            Log.d(FETCH_FOLLOWING_FAILED, response.toString())
-                        }
+            val call = service
+                .getUserByUsernameAndCategory(it, "following")
+            call
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Observer<ArrayList<User>> {
+                    override fun onSubscribe(d: Disposable) {
+                        disposable = d
                     }
 
-                    override fun onFailure(call: Call<ArrayList<User>>, t: Throwable) {
-                        Log.d(FETCH_FOLLOWING_FAILED, t.toString())
+                    override fun onNext(t: ArrayList<User>) {
+                        userList = t
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Log.d(FETCH_FOLLOWING_FAILED, e.toString())
+                    }
+
+                    override fun onComplete() {
+                        setAdapter()
                     }
                 })
         }
@@ -132,22 +151,25 @@ class UserFragment : Fragment() {
 
     private fun fetchFollowersData() {
         username?.let {
-            service.getUserByUsernameAndCategory(it, "followers")
-                .enqueue(object: Callback<ArrayList<User>> {
-                    override fun onResponse(
-                        call: Call<ArrayList<User>>,
-                        response: Response<ArrayList<User>>
-                    ) {
-                        if (response.isSuccessful) {
-                            userList = response.body() as ArrayList<User>
-                            setAdapter()
-                        } else {
-                            Log.d(FETCH_FOLLOWERS_FAILED, response.toString())
-                        }
+            val call = service.getUserByUsernameAndCategory(it, "followers")
+            call
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Observer<ArrayList<User>> {
+                    override fun onSubscribe(d: Disposable) {
+                        disposable = d
                     }
 
-                    override fun onFailure(call: Call<ArrayList<User>>, t: Throwable) {
-                        Log.d(FETCH_FOLLOWERS_FAILED, t.toString())
+                    override fun onNext(t: ArrayList<User>) {
+                        userList = t
+                    }
+
+                    override fun onError(e: Throwable) {
+                        Log.d(FETCH_FOLLOWERS_FAILED, e.toString())
+                    }
+
+                    override fun onComplete() {
+                        setAdapter()
                     }
                 })
         }

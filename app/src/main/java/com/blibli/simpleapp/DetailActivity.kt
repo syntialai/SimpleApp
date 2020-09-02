@@ -8,16 +8,16 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.blibli.futurekotlin.builder.RetrofitClient
 import com.blibli.simpleapp.data.User
-import com.blibli.simpleapp.service.UserService
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.textview.MaterialTextView
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import io.reactivex.Observer
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 
 class DetailActivity : AppCompatActivity() {
 
@@ -32,6 +32,7 @@ class DetailActivity : AppCompatActivity() {
 
     private var username = ""
     private var data: User? = null
+    private var disposable: Disposable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +43,12 @@ class DetailActivity : AppCompatActivity() {
         fetchData()
         setupViewPager()
         setupTabs()
+    }
+
+    override fun onDestroy() {
+        disposable?.dispose()
+        Log.d("isDisposed", disposable?.isDisposed.toString())
+        super.onDestroy()
     }
 
     private fun initView() {
@@ -86,24 +93,25 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun fetchData() {
-        RetrofitClient.createService()
-            .getUserByUsername(username)
-            .enqueue(object : Callback<User> {
-                override fun onResponse(
-                    call: Call<User>,
-                    response: Response<User>
-                ) {
-                    if (response.isSuccessful) {
-                        data = response.body() as User
-
-                        putDataToUI()
-                    } else {
-                        Log.d(FETCH_USER_FAILED, response.toString())
-                    }
+        val call = RetrofitClient.createService().getUserByUsername(username)
+        call
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : Observer<User> {
+                override fun onSubscribe(d: Disposable) {
+                    disposable = d
                 }
 
-                override fun onFailure(call: Call<User>, t: Throwable) {
-                    Log.d(FETCH_USER_FAILED, t.toString())
+                override fun onNext(t: User) {
+                    data = t
+                }
+
+                override fun onError(e: Throwable) {
+                    Log.d(FETCH_USER_FAILED, e.toString())
+                }
+
+                override fun onComplete() {
+                    putDataToUI()
                 }
             })
     }
