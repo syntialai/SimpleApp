@@ -17,7 +17,7 @@ object RetrofitClient {
         val interceptor = Interceptor { chain ->
             val request = chain.request().newBuilder().addHeader(
                 "Authorization",
-                "token d7bcad1075285585c5562cde72df4a85963fb02b"
+                "token 982461148ab9ecd1fe7b9f5bac5b95a80282365f"
             ).build()
             chain.proceed(request)
         }

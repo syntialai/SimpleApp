@@ -1,25 +1,27 @@
 package com.blibli.simpleapp.ui
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.blibli.simpleapp.R
 import com.blibli.simpleapp.data.User
-import com.blibli.simpleapp.network.builder.RetrofitClient
+import com.blibli.simpleapp.data.enums.ApiCall
+import com.blibli.simpleapp.di.impl.DependencyInjectorImpl
+import com.blibli.simpleapp.presenter.detail.DetailContract
+import com.blibli.simpleapp.presenter.detail.impl.DetailPresenter
 import com.blibli.simpleapp.util.ImageHelper
+import com.blibli.simpleapp.util.ResourcesHelper
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.textview.MaterialTextView
-import io.reactivex.Observer
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 
-class DetailActivity : AppCompatActivity() {
+
+class DetailActivity : AppCompatActivity(), DetailContract.View {
 
     private lateinit var tvUsername: MaterialTextView
     private lateinit var tvFollowing: MaterialTextView
@@ -31,24 +33,18 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
 
     private var username = ""
-    private var data: User? = null
-    private var disposable: Disposable? = null
+    private lateinit var presenter: DetailContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
+        setPresenter(DetailPresenter(this, DependencyInjectorImpl()))
+
         initView()
         getUsernameIntent()
-        fetchData()
         setupViewPager()
         setupTabs()
-    }
-
-    override fun onDestroy() {
-        disposable?.dispose()
-        Log.d("isDisposed", disposable?.isDisposed.toString())
-        super.onDestroy()
     }
 
     private fun initView() {
@@ -65,9 +61,9 @@ class DetailActivity : AppCompatActivity() {
     private fun setupTabs() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
             tab.text = if (position == 0) {
-                resources.getString(R.string.following_label)
+                ResourcesHelper.getString(this, R.string.following_label)
             } else {
-                resources.getString(R.string.followers_label)
+                ResourcesHelper.getString(this, R.string.followers_label)
             }
         }.attach()
     }
@@ -79,9 +75,11 @@ class DetailActivity : AppCompatActivity() {
 
             override fun createFragment(position: Int): Fragment {
                 return if (position == 0) {
-                    UserFragment.newInstance(1, 1, username)
+                    UserFragment
+                        .newInstance(1, ApiCall.FETCH_FOLLOWING_DATA.ordinal, username)
                 } else {
-                    UserFragment.newInstance(1, 2, username)
+                    UserFragment
+                        .newInstance(1, ApiCall.FETCH_FOLLOWERS_DATA.ordinal, username)
                 }
             }
         }
@@ -91,36 +89,17 @@ class DetailActivity : AppCompatActivity() {
         val usernameFromIntent = intent.getStringExtra(UserFragment.ARG_USER_NAME)
         usernameFromIntent?.let {
             username = it
+            presenter.fetchData(it)
         }
     }
 
-    private fun fetchData() {
-        val call = RetrofitClient.createService().getUserByUsername(username)
-        call
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<User> {
-                override fun onSubscribe(d: Disposable) {
-                    disposable = d
-                }
-
-                override fun onNext(t: User) {
-                    data = t
-                }
-
-                override fun onError(e: Throwable) {
-                    Log.d(FETCH_USER_FAILED, e.toString())
-                }
-
-                override fun onComplete() {
-                    putDataToUI()
-                }
-            })
+    fun getStartIntent(context: Context?): Intent? {
+        return Intent(context, DetailActivity::class.java)
     }
 
-    private fun putDataToUI() {
+    override fun putDataToUI(data: User) {
         val context = applicationContext
-        data?.let {
+        data.let {
             ImageHelper.resizeAndBuildImage(
                 context,
                 it.avatar_url,
@@ -135,7 +114,7 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
-    companion object {
-        private const val FETCH_USER_FAILED = "FETCH USER FAILED"
+    override fun setPresenter(presenter: DetailContract.Presenter) {
+        this.presenter = presenter
     }
 }

@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:name="com.blibli.simpleapp.UserFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:name="com.blibli.simpleapp.UserFragment"
     tools:context=".ui.UserFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_users"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
-        />
+        android:fillViewport="true">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_users"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+    </ScrollView>
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tv_no_users"
@@ -20,9 +25,8 @@
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/margin_4"
         android:text="@string/empty_users"
-        android:textAppearance="?attr/textAppearanceCaption"
         android:textAlignment="center"
-        android:visibility="gone"
-        />
+        android:textAppearance="?attr/textAppearanceCaption"
+        android:visibility="gone" />
 
 </FrameLayout>

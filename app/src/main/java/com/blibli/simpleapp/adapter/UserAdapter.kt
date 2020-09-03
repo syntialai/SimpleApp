@@ -7,8 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.blibli.simpleapp.R
 import com.blibli.simpleapp.data.User
 import com.blibli.simpleapp.util.ImageHelper
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.textview.MaterialTextView
 

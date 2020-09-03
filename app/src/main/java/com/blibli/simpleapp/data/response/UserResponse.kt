@@ -5,8 +5,8 @@ import com.blibli.simpleapp.data.User
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class UserResponse (
+data class UserResponse(
     val total_count: Int? = null,
     val incomplete_results: Boolean? = null,
     val items: ArrayList<User>? = null
-): Parcelable
+) : Parcelable

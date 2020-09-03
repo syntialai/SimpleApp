@@ -1,21 +1,23 @@
 package com.blibli.simpleapp.ui
 
-import android.content.Context
 import android.os.Bundle
-import android.view.View
-import android.view.inputmethod.InputMethodManager
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.blibli.simpleapp.R
+import com.blibli.simpleapp.base.BaseActivity
+import com.blibli.simpleapp.data.enums.ApiCall
+import com.blibli.simpleapp.presenter.main.MainContract
+import com.blibli.simpleapp.presenter.main.impl.MainPresenter
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     private lateinit var svUser: SearchView
     private lateinit var fragmentManager: FragmentManager
 
-    private var username: String? = null
+    private var username: String = ""
+
+    internal lateinit var presenter: MainContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,12 +26,14 @@ class MainActivity : AppCompatActivity() {
         fragmentManager = supportFragmentManager
 
         svUser = findViewById(R.id.sv_search_user)
-        svUser.setOnQueryTextListener(object: SearchView.OnQueryTextListener {
+        setPresenter(MainPresenter(this))
+
+        svUser.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
-                    hideKeyboard(svUser)
+                    hideKeyboard()
                     username = it
-                    showUserFragment(it)
+                    presenter.onSearchQuerySubmitted(it)
                 }
                 return true
             }
@@ -53,20 +57,9 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
     }
 
-    private fun hideKeyboard(view: View) {
-        val inputManager: InputMethodManager =
-            getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-
-        if (inputManager != null) {
-            inputManager.hideSoftInputFromWindow(
-                view.windowToken,
-                InputMethodManager.HIDE_NOT_ALWAYS
-            )
-        }
-    }
-
-    private fun showUserFragment(query: String) {
-        val userFragment = UserFragment.newInstance(1, 0, query)
+    override fun showUserFragment(query: String) {
+        val userFragment = UserFragment
+            .newInstance(1, ApiCall.FETCH_SEARCH_RESULTS.ordinal, query)
 
         val fragmentTransaction: FragmentTransaction = fragmentManager
             .beginTransaction()
@@ -79,6 +72,10 @@ class MainActivity : AppCompatActivity() {
             R.id.fl_container_users,
             userFragment
         ).addToBackStack(null).commit()
+    }
+
+    override fun setPresenter(presenter: MainContract.Presenter) {
+        this.presenter = presenter
     }
 
     companion object {
