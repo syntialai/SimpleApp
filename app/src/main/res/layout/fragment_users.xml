@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:name="com.blibli.simpleapp.UserFragment"
-    tools:context=".UserFragment">
+    tools:context=".ui.UserFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_users"

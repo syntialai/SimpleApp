@@ -1,7 +1,7 @@
-package com.blibli.simpleapp.service
+package com.blibli.simpleapp.network.service
 
 import com.blibli.simpleapp.data.User
-import com.blibli.simpleapp.response.UserResponse
+import com.blibli.simpleapp.data.response.UserResponse
 import io.reactivex.Observable
 import retrofit2.http.GET
 import retrofit2.http.Path

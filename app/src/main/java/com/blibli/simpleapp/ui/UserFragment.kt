@@ -1,4 +1,4 @@
-package com.blibli.simpleapp
+package com.blibli.simpleapp.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -10,10 +10,12 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.blibli.futurekotlin.builder.RetrofitClient
+import com.blibli.simpleapp.R
+import com.blibli.simpleapp.adapter.UserAdapter
 import com.blibli.simpleapp.data.User
-import com.blibli.simpleapp.response.UserResponse
-import com.blibli.simpleapp.service.UserService
+import com.blibli.simpleapp.data.response.UserResponse
+import com.blibli.simpleapp.network.builder.RetrofitClient
+import com.blibli.simpleapp.network.service.UserService
 import com.google.android.material.textview.MaterialTextView
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -55,9 +57,10 @@ class UserFragment : Fragment() {
 
         tvNoUsers = view.findViewById(R.id.tv_no_users)
         rvUsers = view.findViewById(R.id.rv_users)
-        rvUsers.layoutManager = when {
-            columnCount <= 1 -> LinearLayoutManager(context)
-            else -> GridLayoutManager(context, columnCount)
+        rvUsers.layoutManager = if (columnCount == 1) {
+            LinearLayoutManager(context)
+        } else {
+            GridLayoutManager(context, columnCount)
         }
         rvUsers.adapter = adapter
 
@@ -176,12 +179,13 @@ class UserFragment : Fragment() {
     }
 
     companion object {
-        const val ARG_COLUMN_COUNT = "COLUMN_COUNT"
-        const val ARG_API_ID = "API_ID"
         const val ARG_USER_NAME = "USER_NAME"
-        const val FETCH_FOLLOWING_FAILED = "FETCH FOLLOWING_FAILED"
-        const val FETCH_FOLLOWERS_FAILED = "FETCH FOLLOWERS_FAILED"
-        const val SEARCH_FAILED = "SEARCH FAILED"
+
+        private const val ARG_COLUMN_COUNT = "COLUMN_COUNT"
+        private const val ARG_API_ID = "API_ID"
+        private const val FETCH_FOLLOWING_FAILED = "FETCH FOLLOWING_FAILED"
+        private const val FETCH_FOLLOWERS_FAILED = "FETCH FOLLOWERS_FAILED"
+        private const val SEARCH_FAILED = "SEARCH FAILED"
 
         @JvmStatic
         fun newInstance(columnCount: Int, id: Int, username: String) =

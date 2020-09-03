@@ -1,6 +1,6 @@
-package com.blibli.futurekotlin.builder
+package com.blibli.simpleapp.network.builder
 
-import com.blibli.simpleapp.service.UserService
+import com.blibli.simpleapp.network.service.UserService
 import io.reactivex.schedulers.Schedulers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient

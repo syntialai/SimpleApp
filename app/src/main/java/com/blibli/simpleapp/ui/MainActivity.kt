@@ -1,20 +1,14 @@
-package com.blibli.simpleapp
+package com.blibli.simpleapp.ui
 
 import android.content.Context
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import com.blibli.futurekotlin.builder.RetrofitClient
-import com.blibli.simpleapp.data.User
-import com.blibli.simpleapp.response.UserResponse
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.blibli.simpleapp.R
 
 class MainActivity : AppCompatActivity() {
 
@@ -88,6 +82,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val QUERY = "QUERY"
+        private const val QUERY = "QUERY"
     }
 }

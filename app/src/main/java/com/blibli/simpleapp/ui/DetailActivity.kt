@@ -1,4 +1,4 @@
-package com.blibli.simpleapp
+package com.blibli.simpleapp.ui
 
 import android.os.Bundle
 import android.util.Log
@@ -6,10 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
-import com.blibli.futurekotlin.builder.RetrofitClient
+import com.blibli.simpleapp.R
 import com.blibli.simpleapp.data.User
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
+import com.blibli.simpleapp.network.builder.RetrofitClient
+import com.blibli.simpleapp.util.ImageHelper
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -64,22 +64,24 @@ class DetailActivity : AppCompatActivity() {
 
     private fun setupTabs() {
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
-            tab.text = when(position) {
-                0 -> resources.getString(R.string.following_label)
-                else -> resources.getString(R.string.followers_label)
+            tab.text = if (position == 0) {
+                resources.getString(R.string.following_label)
+            } else {
+                resources.getString(R.string.followers_label)
             }
         }.attach()
     }
 
     private fun setupViewPager() {
-        viewPager.adapter = object: FragmentStateAdapter(this) {
+        viewPager.adapter = object : FragmentStateAdapter(this) {
 
             override fun getItemCount(): Int = 2
 
             override fun createFragment(position: Int): Fragment {
-                return when (position) {
-                    0 -> UserFragment.newInstance(1, 1, username)
-                    else -> UserFragment.newInstance(1, 2, username)
+                return if (position == 0) {
+                    UserFragment.newInstance(1, 1, username)
+                } else {
+                    UserFragment.newInstance(1, 2, username)
                 }
             }
         }
@@ -119,16 +121,12 @@ class DetailActivity : AppCompatActivity() {
     private fun putDataToUI() {
         val context = applicationContext
         data?.let {
-            Glide.with(context)
-                .load(it.avatar_url)
-                .apply(
-                    RequestOptions().override(
-                        context.resources.getDimensionPixelSize(R.dimen.image_user_detail_size),
-                        context.resources.getDimensionPixelSize(R.dimen.image_user_detail_size)
-                    )
-                )
-                .centerCrop()
-                .into(ivUserImage)
+            ImageHelper.resizeAndBuildImage(
+                context,
+                it.avatar_url,
+                ivUserImage,
+                R.dimen.image_user_detail_size
+            )
 
             tvUsername.text = it.login
             tvFollowing.text = it.following.toString()
@@ -138,6 +136,6 @@ class DetailActivity : AppCompatActivity() {
     }
 
     companion object {
-        const val FETCH_USER_FAILED = "FETCH USER FAILED"
+        private const val FETCH_USER_FAILED = "FETCH USER FAILED"
     }
 }

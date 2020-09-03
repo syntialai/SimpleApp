@@ -1,10 +1,12 @@
-package com.blibli.simpleapp
+package com.blibli.simpleapp.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.blibli.simpleapp.R
 import com.blibli.simpleapp.data.User
+import com.blibli.simpleapp.util.ImageHelper
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.imageview.ShapeableImageView
@@ -30,16 +32,12 @@ class UserAdapter : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
         val item = users[position]
 
         holder.tvUserName.text = item.login
-        Glide.with(holder.itemView.context)
-            .load(item.avatar_url)
-            .apply(
-                RequestOptions().override(
-                    holder.itemView.context.resources.getDimensionPixelSize(R.dimen.image_user_size),
-                    holder.itemView.context.resources.getDimensionPixelSize(R.dimen.image_user_size)
-                )
-            )
-            .centerCrop()
-            .into(holder.ivUserImage)
+        ImageHelper.resizeAndBuildImage(
+            holder.itemView.context,
+            item.avatar_url,
+            holder.ivUserImage,
+            R.dimen.image_user_size
+        )
 
         holder.itemView.setOnClickListener {
             onItemClickCallback.onItemClicked(users[holder.adapterPosition])
