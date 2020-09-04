@@ -8,7 +8,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".ui.MainActivity">
+        tools:context=".feature.user.view.main.MainActivity">
 
         <LinearLayout
             android:id="@+id/ll_title"
