@@ -5,11 +5,13 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.blibli.simpleapp.R
+import com.blibli.simpleapp.SimpleApp
 import com.blibli.simpleapp.core.base.BaseActivity
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
 import com.blibli.simpleapp.feature.user.presenter.main.MainPresenterContract
 import com.blibli.simpleapp.feature.user.presenter.main.MainPresenterImpl
 import com.blibli.simpleapp.feature.user.view.user.UserFragment
+import javax.inject.Inject
 
 class MainActivity : BaseActivity() {
 
@@ -18,7 +20,8 @@ class MainActivity : BaseActivity() {
 
     private var username: String = ""
 
-    internal lateinit var presenter: MainPresenterContract
+    @Inject
+    lateinit var presenter: MainPresenterImpl
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +30,9 @@ class MainActivity : BaseActivity() {
         fragmentManager = supportFragmentManager
 
         svUser = findViewById(R.id.sv_search_user)
-        setPresenter(MainPresenterImpl(this))
+
+        (application as SimpleApp).getAppComponent().inject(this)
+        presenter.injectView(this)
 
         svUser.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
@@ -72,10 +77,6 @@ class MainActivity : BaseActivity() {
             R.id.fl_container_users,
             userFragment
         ).addToBackStack(null).commit()
-    }
-
-    override fun setPresenter(presenter: MainPresenterContract) {
-        this.presenter = presenter
     }
 
     companion object {

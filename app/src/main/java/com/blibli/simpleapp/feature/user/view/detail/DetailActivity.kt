@@ -13,7 +13,6 @@ import com.blibli.simpleapp.core.util.ImageHelper
 import com.blibli.simpleapp.core.util.ResourcesHelper
 import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
-import com.blibli.simpleapp.feature.user.presenter.detail.DetailPresenterContract
 import com.blibli.simpleapp.feature.user.presenter.detail.DetailPresenterImpl
 import com.blibli.simpleapp.feature.user.view.user.UserFragment
 import com.google.android.material.imageview.ShapeableImageView
@@ -25,7 +24,7 @@ import javax.inject.Inject
 
 class DetailActivity : AppCompatActivity(), DetailViewContract {
 
-    @Inject
+//    @Inject
     lateinit var presenter: DetailPresenterImpl
 
     private lateinit var tvUsername: MaterialTextView
@@ -43,8 +42,8 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
-        (application as SimpleApp).getUserComponent().inject(this)
-//        setPresenter(DetailPresenterImpl(this))
+//        (application as SimpleApp).getUserComponent().inject(this)
+        presenter.injectView(this)
 
         initView()
         getUsernameIntent()
@@ -100,7 +99,7 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
         return Intent(context, DetailActivity::class.java)
     }
 
-    fun putDataToUI(data: User) {
+    override fun putDataToUI(data: User) {
         val context = applicationContext
         data.let {
             ImageHelper.resizeAndBuildImage(
@@ -116,8 +115,4 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
             tvRepos.text = it.public_repos.toString()
         }
     }
-
-//    override fun setPresenter(presenter: DetailPresenterContract) {
-//        this.presenter = presenter
-//    }
 }

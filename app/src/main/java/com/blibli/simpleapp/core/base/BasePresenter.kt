@@ -1,6 +1,8 @@
 package com.blibli.simpleapp.core.base
 
-interface BasePresenter {
+interface BasePresenter<T> {
 
     fun onDestroy()
+
+    fun injectView(view: T)
 }

@@ -10,13 +10,14 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blibli.simpleapp.R
+import com.blibli.simpleapp.SimpleApp
 import com.blibli.simpleapp.feature.user.adapter.UserAdapter
 import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
-import com.blibli.simpleapp.feature.user.presenter.user.UserPresenterContract
 import com.blibli.simpleapp.feature.user.presenter.user.UserPresenterImpl
 import com.blibli.simpleapp.feature.user.view.detail.DetailActivity
 import com.google.android.material.textview.MaterialTextView
+import javax.inject.Inject
 
 class UserFragment : Fragment(), UserViewContract {
 
@@ -29,13 +30,14 @@ class UserFragment : Fragment(), UserViewContract {
     private lateinit var rvUsers: RecyclerView
     private lateinit var tvNoUsers: MaterialTextView
 
-
-    private lateinit var presenter: UserPresenterContract
+    @Inject
+    lateinit var presenter: UserPresenterImpl
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setPresenter(UserPresenterImpl(this))
+        (activity?.application as SimpleApp).getUserComponent().inject(this)
+        presenter.injectView(this)
 
         arguments?.let {
             columnCount = it.getInt(ARG_COLUMN_COUNT)
@@ -76,10 +78,6 @@ class UserFragment : Fragment(), UserViewContract {
     override fun setAdapter(userList: ArrayList<User>) {
         adapter.updateList(userList)
         showRecyclerView(userList.size > 0)
-    }
-
-    override fun setPresenter(presenter: UserPresenterContract) {
-        this.presenter = presenter
     }
 
     private fun showRecyclerView(show: Boolean) {

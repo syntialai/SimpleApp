@@ -9,13 +9,13 @@ import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
 import javax.inject.Inject
 
-// (dependencyInjector: DependencyInjector)
-class DetailPresenterImpl @Inject constructor(view: DetailViewContract) : DetailPresenterContract {
+// @Inject constructor()
+class DetailPresenterImpl : DetailPresenterContract {
 
-    @Inject
+//    @Inject
     lateinit var service: UserService
 
-    private var view: DetailViewContract? = view
+    private lateinit var view: DetailViewContract
     private var data: User? = null
     private var disposable: Disposable? = null
 
@@ -37,14 +37,17 @@ class DetailPresenterImpl @Inject constructor(view: DetailViewContract) : Detail
                 }
 
                 override fun onComplete() {
-                    data?.let { view?.putDataToUI(it) }
+                    data?.let { view.putDataToUI(it) }
                 }
             })
     }
 
     override fun onDestroy() {
         disposable?.dispose()
-        this.view = null
+    }
+
+    override fun injectView(view: DetailViewContract) {
+        this.view = view
     }
 
     companion object {

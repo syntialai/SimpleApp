@@ -13,14 +13,10 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-// dependencyInjector: DependencyInjector
-class UserPresenterImpl @Inject constructor(view: UserViewContract) :
+class UserPresenterImpl @Inject constructor(private var service: UserService) :
     UserPresenterContract {
 
-    @Inject
-    lateinit var service: UserService
-
-    private var view: UserViewContract? = view
+    private lateinit var view: UserViewContract
     private var data: ArrayList<User> = arrayListOf()
     private var disposable: Disposable? = null
 
@@ -50,7 +46,7 @@ class UserPresenterImpl @Inject constructor(view: UserViewContract) :
                 }
 
                 override fun onComplete() {
-                    view?.setAdapter(data)
+                    view.setAdapter(data)
                 }
             })
     }
@@ -65,7 +61,10 @@ class UserPresenterImpl @Inject constructor(view: UserViewContract) :
 
     override fun onDestroy() {
         disposable?.dispose()
-        this.view = null
+    }
+
+    override fun injectView(view: UserViewContract) {
+        this.view = view
     }
 
     private fun fetchByCategory(username: String, category: String, log: String) {
@@ -86,7 +85,7 @@ class UserPresenterImpl @Inject constructor(view: UserViewContract) :
                 }
 
                 override fun onComplete() {
-                    view?.setAdapter(data)
+                    view.setAdapter(data)
                 }
             })
     }
