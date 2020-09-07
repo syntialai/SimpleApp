@@ -20,6 +20,17 @@ class SimpleApp : Application(), HasAndroidInjector {
     override fun onCreate() {
         super.onCreate()
 
+//        With AndroidInjector Builder
+        DaggerAppComponent.builder()
+            .netModule(
+                NetModule(
+                    RetrofitClient.BASE_URL,
+                    RetrofitClient.TOKEN
+                )
+            )
+            .build()
+            .inject(this)
+
 //        Basic builder
 //        mAppComponent = DaggerAppComponent.builder()
 //            .appModule(AppModule(this))
@@ -36,17 +47,6 @@ class SimpleApp : Application(), HasAndroidInjector {
 //            .appComponent(mAppComponent)
 //            .userModule(UserModule())
 //            .build()
-
-//        With AndroidInjector Builder
-        DaggerAppComponent.builder()
-            .netModule(
-                NetModule(
-                    RetrofitClient.BASE_URL,
-                    RetrofitClient.TOKEN
-                )
-            )
-            .build()
-            .inject(this)
     }
 
     override fun androidInjector(): AndroidInjector<Any> {

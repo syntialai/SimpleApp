@@ -3,6 +3,7 @@ package com.blibli.simpleapp.feature.user.view.detail
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -39,36 +40,53 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
     private var username = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
+//        With AndroidInjection
+        AndroidInjection.inject(this)
+        presenter.injectView(this)
+
 //        Dependent component
 //        (application as SimpleApp).getUserComponent().inject(this)
-
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detail)
 
 //        Subcomponent
 //        (application as SimpleApp). getAppComponent()
 //            .userSubcomponent(UserModule())
 //            .inject(this)
 
-//        With AndroidInjection
-        AndroidInjection.inject(this)
-        presenter.injectView(this)
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_detail)
 
-        initView()
         getUsernameIntent()
-        setupViewPager()
-        setupTabs()
+        initVar()
     }
 
-    private fun initView() {
+    override fun initVar(view: View?) {
         tvUsername = findViewById(R.id.tv_user_detail_username)
         tvFollowing = findViewById(R.id.tv_user_detail_following)
         tvFollowers = findViewById(R.id.tv_user_detail_followers)
         tvRepos = findViewById(R.id.tv_user_detail_repos)
         ivUserImage = findViewById(R.id.iv_user_detail_image)
-
         tabLayout = findViewById(R.id.tab_users)
         viewPager = findViewById(R.id.viewpager_user)
+
+        setupViewPager()
+        setupTabs()
+    }
+
+    override fun putDataToUI(data: User) {
+        val context = applicationContext
+        data.let {
+            ImageHelper.resizeAndBuildImage(
+                context,
+                it.avatar_url,
+                ivUserImage,
+                R.dimen.image_user_detail_size
+            )
+
+            tvUsername.text = it.login
+            tvFollowing.text = it.following.toString()
+            tvFollowers.text = it.followers.toString()
+            tvRepos.text = it.public_repos.toString()
+        }
     }
 
     private fun setupTabs() {
@@ -106,22 +124,5 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
 
     fun getStartIntent(context: Context?): Intent? {
         return Intent(context, DetailActivity::class.java)
-    }
-
-    override fun putDataToUI(data: User) {
-        val context = applicationContext
-        data.let {
-            ImageHelper.resizeAndBuildImage(
-                context,
-                it.avatar_url,
-                ivUserImage,
-                R.dimen.image_user_detail_size
-            )
-
-            tvUsername.text = it.login
-            tvFollowing.text = it.following.toString()
-            tvFollowers.text = it.followers.toString()
-            tvRepos.text = it.public_repos.toString()
-        }
     }
 }

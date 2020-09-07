@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     const val BASE_URL = "https://api.github.com/"
-    const val TOKEN = "375d106c150b75f77bb78f88238d3c5794e3841b"
+    const val TOKEN = "a03c6d89615e4c25a211b87ed8559265c5d1ee92"
     private var client: OkHttpClient
     private var rxAdapter: RxJava2CallAdapterFactory
 

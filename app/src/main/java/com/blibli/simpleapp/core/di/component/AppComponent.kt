@@ -1,10 +1,12 @@
 package com.blibli.simpleapp.core.di.component
 
 import com.blibli.simpleapp.SimpleApp
-import com.blibli.simpleapp.core.di.module.*
+import com.blibli.simpleapp.core.di.module.ActivityModule
+import com.blibli.simpleapp.core.di.module.AppModule
+import com.blibli.simpleapp.core.di.module.FragmentModule
+import com.blibli.simpleapp.core.di.module.NetModule
 import dagger.Component
 import dagger.android.AndroidInjectionModule
-import retrofit2.Retrofit
 import javax.inject.Singleton
 
 @Singleton

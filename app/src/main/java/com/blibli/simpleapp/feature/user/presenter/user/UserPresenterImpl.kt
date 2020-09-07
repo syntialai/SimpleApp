@@ -1,6 +1,7 @@
 package com.blibli.simpleapp.feature.user.presenter.user
 
 import android.util.Log
+import com.blibli.simpleapp.core.di.scope.UserScope
 import com.blibli.simpleapp.core.network.service.UserService
 import com.blibli.simpleapp.core.util.RxHelper.ioToMain
 import com.blibli.simpleapp.feature.user.model.User
@@ -13,6 +14,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
+@UserScope
 class UserPresenterImpl @Inject constructor(private var service: UserService) :
     UserPresenterContract {
 

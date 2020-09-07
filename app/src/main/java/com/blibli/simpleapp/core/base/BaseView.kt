@@ -1,3 +1,8 @@
 package com.blibli.simpleapp.core.base
 
-interface BaseView<T>
+import android.view.View
+
+interface BaseView<T> {
+
+    fun initVar(view: View? = null)
+}

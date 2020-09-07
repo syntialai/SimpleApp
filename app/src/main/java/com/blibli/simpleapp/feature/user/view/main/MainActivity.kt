@@ -1,6 +1,7 @@
 package com.blibli.simpleapp.feature.user.view.main
 
 import android.os.Bundle
+import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
@@ -32,32 +33,8 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        fragmentManager = supportFragmentManager
-
-        svUser = findViewById(R.id.sv_search_user)
-
-        svUser.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
-            override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {
-                    hideKeyboard()
-                    username = it
-                    presenter.onSearchQuerySubmitted(it)
-                }
-                return true
-            }
-
-            override fun onQueryTextChange(newText: String?): Boolean {
-                return true
-            }
-        })
-
-        if (savedInstanceState != null) {
-            val savedQuery = savedInstanceState.getString(QUERY)
-            savedQuery?.let {
-                svUser.setQuery(it, true)
-                showUserFragment(it)
-            }
-        }
+        initVar()
+        initState(savedInstanceState)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -79,6 +56,36 @@ class MainActivity : BaseActivity() {
             R.id.fl_container_users,
             userFragment
         ).addToBackStack(null).commit()
+    }
+
+    override fun initVar(view: View?) {
+        fragmentManager = supportFragmentManager
+
+        svUser = findViewById(R.id.sv_search_user)
+        svUser.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                query?.let {
+                    hideKeyboard()
+                    username = it
+                    presenter.onSearchQuerySubmitted(it)
+                }
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return true
+            }
+        })
+    }
+
+    private fun initState(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            val savedQuery = savedInstanceState.getString(QUERY)
+            savedQuery?.let {
+                svUser.setQuery(it, true)
+                showUserFragment(it)
+            }
+        }
     }
 
     companion object {

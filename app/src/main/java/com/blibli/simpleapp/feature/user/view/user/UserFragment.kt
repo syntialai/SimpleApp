@@ -17,7 +17,7 @@ import com.blibli.simpleapp.feature.user.model.enums.ApiCall
 import com.blibli.simpleapp.feature.user.presenter.user.UserPresenterImpl
 import com.blibli.simpleapp.feature.user.view.detail.DetailActivity
 import com.google.android.material.textview.MaterialTextView
-import dagger.android.AndroidInjection
+import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
 class UserFragment : Fragment(), UserViewContract {
@@ -50,8 +50,44 @@ class UserFragment : Fragment(), UserViewContract {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_users, container, false)
 
-        tvNoUsers = view.findViewById(R.id.tv_no_users)
-        rvUsers = view.findViewById(R.id.rv_users)
+        initVar(view)
+
+        username?.let { name ->
+            presenter.initData(apiId, name)
+        }
+        presenter.injectView(this)
+
+        return view
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        //        With AndroidInjector
+        AndroidSupportInjection.inject(this)
+
+//        User dependent component
+//        (context.applicationContext as SimpleApp).getUserComponent().inject(this)
+
+//        User subcomponent
+//        (context.applicationContext as SimpleApp).getAppComponent()
+//            .userSubcomponent(UserModule())
+//            .inject(this)
+    }
+
+    override fun setAdapter(userList: ArrayList<User>) {
+        adapter.updateList(userList)
+        showRecyclerView(userList.size > 0)
+    }
+
+    override fun initVar(view: View?) {
+        view?.let {
+            tvNoUsers = it.findViewById(R.id.tv_no_users)
+            rvUsers = it.findViewById(R.id.rv_users)
+        }
+        setupRV()
+    }
+
+    private fun setupRV() {
         rvUsers.layoutManager = if (columnCount == 1) {
             LinearLayoutManager(context)
         } else {
@@ -66,32 +102,6 @@ class UserFragment : Fragment(), UserViewContract {
                 startActivity(intent)
             }
         })
-
-        username?.let { name ->
-            presenter.initData(apiId, name)
-        }
-        presenter.injectView(this)
-
-        return view
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        //        With AndroidInjector
-        AndroidInjection.inject(activity)
-
-//        User dependent component
-//        (context.applicationContext as SimpleApp).getUserComponent().inject(this)
-
-//        User subcomponent
-//        (context.applicationContext as SimpleApp).getAppComponent()
-//            .userSubcomponent(UserModule())
-//            .inject(this)
-    }
-
-    override fun setAdapter(userList: ArrayList<User>) {
-        adapter.updateList(userList)
-        showRecyclerView(userList.size > 0)
     }
 
     private fun showRecyclerView(show: Boolean) {
