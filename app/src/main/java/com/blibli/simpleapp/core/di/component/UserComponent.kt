@@ -6,6 +6,7 @@ package com.blibli.simpleapp.core.di.component
 //import com.blibli.simpleapp.feature.user.view.user.UserFragment
 //import dagger.Component
 //
+// Dependent components
 //@UserScope
 //@Component(dependencies = [AppComponent::class], modules = [UserModule::class])
 //interface UserComponent {

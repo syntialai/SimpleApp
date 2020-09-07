@@ -11,14 +11,13 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blibli.simpleapp.R
-import com.blibli.simpleapp.SimpleApp
-import com.blibli.simpleapp.core.di.module.UserModule
 import com.blibli.simpleapp.feature.user.adapter.UserAdapter
 import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
 import com.blibli.simpleapp.feature.user.presenter.user.UserPresenterImpl
 import com.blibli.simpleapp.feature.user.view.detail.DetailActivity
 import com.google.android.material.textview.MaterialTextView
+import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 class UserFragment : Fragment(), UserViewContract {
@@ -42,9 +41,6 @@ class UserFragment : Fragment(), UserViewContract {
             columnCount = it.getInt(ARG_COLUMN_COUNT)
             apiId = it.getInt(ARG_API_ID)
             username = it.getString(ARG_USER_NAME)
-            username?.let { name ->
-                presenter.initData(apiId, name)
-            }
         }
     }
 
@@ -71,6 +67,9 @@ class UserFragment : Fragment(), UserViewContract {
             }
         })
 
+        username?.let { name ->
+            presenter.initData(apiId, name)
+        }
         presenter.injectView(this)
 
         return view
@@ -78,14 +77,16 @@ class UserFragment : Fragment(), UserViewContract {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+        //        With AndroidInjector
+        AndroidInjection.inject(activity)
 
 //        User dependent component
 //        (context.applicationContext as SimpleApp).getUserComponent().inject(this)
 
 //        User subcomponent
-        (context.applicationContext as SimpleApp).getAppComponent()
-            .userSubcomponent(UserModule())
-            .inject(this)
+//        (context.applicationContext as SimpleApp).getAppComponent()
+//            .userSubcomponent(UserModule())
+//            .inject(this)
     }
 
     override fun setAdapter(userList: ArrayList<User>) {

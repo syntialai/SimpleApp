@@ -8,8 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.blibli.simpleapp.R
-import com.blibli.simpleapp.SimpleApp
-import com.blibli.simpleapp.core.di.module.UserModule
 import com.blibli.simpleapp.core.util.ImageHelper
 import com.blibli.simpleapp.core.util.ResourcesHelper
 import com.blibli.simpleapp.feature.user.model.User
@@ -20,6 +18,7 @@ import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.textview.MaterialTextView
+import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 
@@ -40,16 +39,19 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
     private var username = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_detail)
-
 //        Dependent component
 //        (application as SimpleApp).getUserComponent().inject(this)
 
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_detail)
+
 //        Subcomponent
-        (application as SimpleApp).getAppComponent()
-            .userSubcomponent(UserModule())
-            .inject(this)
+//        (application as SimpleApp). getAppComponent()
+//            .userSubcomponent(UserModule())
+//            .inject(this)
+
+//        With AndroidInjection
+        AndroidInjection.inject(this)
         presenter.injectView(this)
 
         initView()

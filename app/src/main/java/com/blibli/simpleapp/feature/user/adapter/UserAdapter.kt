@@ -49,7 +49,7 @@ class UserAdapter : RecyclerView.Adapter<UserAdapter.ViewHolder>() {
         notifyDataSetChanged()
     }
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvUserName: MaterialTextView = view.findViewById(R.id.tv_user_name)
         val ivUserImage: ShapeableImageView = view.findViewById(R.id.iv_user_image)
     }

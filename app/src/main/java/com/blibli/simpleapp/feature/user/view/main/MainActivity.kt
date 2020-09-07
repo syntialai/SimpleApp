@@ -5,11 +5,11 @@ import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import com.blibli.simpleapp.R
-import com.blibli.simpleapp.SimpleApp
 import com.blibli.simpleapp.core.base.BaseActivity
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
 import com.blibli.simpleapp.feature.user.presenter.main.MainPresenterImpl
 import com.blibli.simpleapp.feature.user.view.user.UserFragment
+import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 class MainActivity : BaseActivity() {
@@ -23,15 +23,18 @@ class MainActivity : BaseActivity() {
     lateinit var presenter: MainPresenterImpl
 
     override fun onCreate(savedInstanceState: Bundle?) {
+//        With AndroidInjection
+        AndroidInjection.inject(this)
+
+//        (application as SimpleApp).getAppComponent().inject(this)
+        presenter.injectView(this)
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         fragmentManager = supportFragmentManager
 
         svUser = findViewById(R.id.sv_search_user)
-
-        (application as SimpleApp).getAppComponent().inject(this)
-        presenter.injectView(this)
 
         svUser.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
