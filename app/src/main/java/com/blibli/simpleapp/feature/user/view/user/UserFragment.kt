@@ -1,5 +1,6 @@
 package com.blibli.simpleapp.feature.user.view.user
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blibli.simpleapp.R
 import com.blibli.simpleapp.SimpleApp
+import com.blibli.simpleapp.core.di.module.UserModule
 import com.blibli.simpleapp.feature.user.adapter.UserAdapter
 import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
@@ -35,9 +37,6 @@ class UserFragment : Fragment(), UserViewContract {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        (activity?.application as SimpleApp).getUserComponent().inject(this)
-        presenter.injectView(this)
 
         arguments?.let {
             columnCount = it.getInt(ARG_COLUMN_COUNT)
@@ -72,7 +71,21 @@ class UserFragment : Fragment(), UserViewContract {
             }
         })
 
+        presenter.injectView(this)
+
         return view
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+//        User dependent component
+//        (context.applicationContext as SimpleApp).getUserComponent().inject(this)
+
+//        User subcomponent
+        (context.applicationContext as SimpleApp).getAppComponent()
+            .userSubcomponent(UserModule())
+            .inject(this)
     }
 
     override fun setAdapter(userList: ArrayList<User>) {

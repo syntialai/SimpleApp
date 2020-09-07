@@ -9,6 +9,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.blibli.simpleapp.R
 import com.blibli.simpleapp.SimpleApp
+import com.blibli.simpleapp.core.di.module.UserModule
 import com.blibli.simpleapp.core.util.ImageHelper
 import com.blibli.simpleapp.core.util.ResourcesHelper
 import com.blibli.simpleapp.feature.user.model.User
@@ -24,7 +25,7 @@ import javax.inject.Inject
 
 class DetailActivity : AppCompatActivity(), DetailViewContract {
 
-//    @Inject
+    @Inject
     lateinit var presenter: DetailPresenterImpl
 
     private lateinit var tvUsername: MaterialTextView
@@ -42,7 +43,13 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
+//        Dependent component
 //        (application as SimpleApp).getUserComponent().inject(this)
+
+//        Subcomponent
+        (application as SimpleApp).getAppComponent()
+            .userSubcomponent(UserModule())
+            .inject(this)
         presenter.injectView(this)
 
         initView()

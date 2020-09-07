@@ -8,7 +8,6 @@ import com.blibli.simpleapp.R
 import com.blibli.simpleapp.SimpleApp
 import com.blibli.simpleapp.core.base.BaseActivity
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
-import com.blibli.simpleapp.feature.user.presenter.main.MainPresenterContract
 import com.blibli.simpleapp.feature.user.presenter.main.MainPresenterImpl
 import com.blibli.simpleapp.feature.user.view.user.UserFragment
 import javax.inject.Inject

@@ -10,6 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     const val BASE_URL = "https://api.github.com/"
+    const val TOKEN = "375d106c150b75f77bb78f88238d3c5794e3841b"
     private var client: OkHttpClient
     private var rxAdapter: RxJava2CallAdapterFactory
 
@@ -17,7 +18,7 @@ object RetrofitClient {
         val interceptor = Interceptor { chain ->
             val request = chain.request().newBuilder().addHeader(
                 "Authorization",
-                "token 982461148ab9ecd1fe7b9f5bac5b95a80282365f"
+                "token $TOKEN"
             ).build()
             chain.proceed(request)
         }

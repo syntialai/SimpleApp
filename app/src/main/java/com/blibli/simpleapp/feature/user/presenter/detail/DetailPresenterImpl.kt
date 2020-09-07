@@ -9,11 +9,8 @@ import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
 import javax.inject.Inject
 
-// @Inject constructor()
-class DetailPresenterImpl : DetailPresenterContract {
-
-//    @Inject
-    lateinit var service: UserService
+class DetailPresenterImpl @Inject constructor(private var service: UserService) :
+    DetailPresenterContract {
 
     private lateinit var view: DetailViewContract
     private var data: User? = null
