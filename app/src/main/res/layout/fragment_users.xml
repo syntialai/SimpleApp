@@ -7,17 +7,11 @@
     android:orientation="vertical"
     tools:context=".feature.user.view.user.UserFragment">
 
-    <ScrollView
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_users"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_users"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="gone" />
-    </ScrollView>
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/tv_no_users"

@@ -7,4 +7,6 @@ import com.blibli.simpleapp.feature.user.presenter.user.UserPresenterContract
 interface UserViewContract : BaseView<UserPresenterContract> {
 
     fun setAdapter(userList: ArrayList<User>)
+
+    fun notifyItemInserted(position: Int)
 }

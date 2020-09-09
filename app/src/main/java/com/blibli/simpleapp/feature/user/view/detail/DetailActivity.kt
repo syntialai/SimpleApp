@@ -40,17 +40,8 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
     private var username = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
-//        With AndroidInjection
         AndroidInjection.inject(this)
         presenter.injectView(this)
-
-//        Dependent component
-//        (application as SimpleApp).getUserComponent().inject(this)
-
-//        Subcomponent
-//        (application as SimpleApp). getAppComponent()
-//            .userSubcomponent(UserModule())
-//            .inject(this)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
@@ -74,18 +65,20 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
 
     override fun putDataToUI(data: User) {
         val context = applicationContext
-        data.let {
-            ImageHelper.resizeAndBuildImage(
-                context,
-                it.avatar_url,
-                ivUserImage,
-                R.dimen.image_user_detail_size
-            )
+        data.let { user ->
+            user.avatar_url?.let { image ->
+                ImageHelper.resizeAndBuildImage(
+                    context,
+                    image,
+                    ivUserImage,
+                    R.dimen.image_user_detail_size
+                )
+            }
 
-            tvUsername.text = it.login
-            tvFollowing.text = it.following.toString()
-            tvFollowers.text = it.followers.toString()
-            tvRepos.text = it.public_repos.toString()
+            tvUsername.text = user.login
+            tvFollowing.text = user.following.toString()
+            tvFollowers.text = user.followers.toString()
+            tvRepos.text = user.public_repos.toString()
         }
     }
 
@@ -106,9 +99,13 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
 
             override fun createFragment(position: Int): Fragment {
                 return if (position == 0) {
-                    UserFragment.newInstance(1, ApiCall.FETCH_FOLLOWING_DATA.ordinal, username)
+                    UserFragment.newInstance(
+                        1, ApiCall.FETCH_FOLLOWING_DATA.ordinal, username
+                    )
                 } else {
-                    UserFragment.newInstance(1, ApiCall.FETCH_FOLLOWERS_DATA.ordinal, username)
+                    UserFragment.newInstance(
+                        1, ApiCall.FETCH_FOLLOWERS_DATA.ordinal, username
+                    )
                 }
             }
         }

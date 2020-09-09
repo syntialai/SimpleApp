@@ -24,10 +24,7 @@ class MainActivity : BaseActivity() {
     lateinit var presenter: MainPresenterImpl
 
     override fun onCreate(savedInstanceState: Bundle?) {
-//        With AndroidInjection
         AndroidInjection.inject(this)
-
-//        (application as SimpleApp).getAppComponent().inject(this)
         presenter.injectView(this)
 
         super.onCreate(savedInstanceState)

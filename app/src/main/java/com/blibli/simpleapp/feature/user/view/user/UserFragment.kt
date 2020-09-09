@@ -3,6 +3,7 @@ package com.blibli.simpleapp.feature.user.view.user
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +26,7 @@ class UserFragment : Fragment(), UserViewContract {
     private var columnCount = 1
     private var apiId = ApiCall.FETCH_SEARCH_RESULTS.ordinal
     private var username: String? = null
+    private var isLoading: Boolean = false
 
     private var adapter = UserAdapter()
 
@@ -62,21 +64,16 @@ class UserFragment : Fragment(), UserViewContract {
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
-        //        With AndroidInjector
         AndroidSupportInjection.inject(this)
-
-//        User dependent component
-//        (context.applicationContext as SimpleApp).getUserComponent().inject(this)
-
-//        User subcomponent
-//        (context.applicationContext as SimpleApp).getAppComponent()
-//            .userSubcomponent(UserModule())
-//            .inject(this)
     }
 
     override fun setAdapter(userList: ArrayList<User>) {
         adapter.updateList(userList)
         showRecyclerView(userList.size > 0)
+    }
+
+    override fun notifyItemInserted(position: Int) {
+        adapter.notifyItemInserted(position)
     }
 
     override fun initVar(view: View?) {
@@ -95,6 +92,32 @@ class UserFragment : Fragment(), UserViewContract {
         }
         rvUsers.adapter = adapter
 
+        setupAdapter()
+        setupRVScrollListener()
+    }
+
+    private fun setupRVScrollListener() {
+        rvUsers.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+
+                val layoutManager: LinearLayoutManager =
+                    recyclerView.layoutManager as LinearLayoutManager
+
+                if (!isLoading) {
+                    if (layoutManager != null
+                        && layoutManager.findLastCompletelyVisibleItemPosition()
+                        == (presenter.data.value?.size ?: 0) - 1
+                    ) {
+                        presenter.loadMore()
+                    }
+                }
+            }
+        })
+    }
+
+    private fun setupAdapter() {
         adapter.setOnItemClickedCallback(object : UserAdapter.OnItemClickCallback {
             override fun onItemClicked(data: User) {
                 val intent = Intent(context, DetailActivity::class.java)

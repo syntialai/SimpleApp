@@ -11,16 +11,12 @@ import javax.inject.Inject
 
 class SimpleApp : Application(), HasAndroidInjector {
 
-//    private lateinit var mAppComponent: AppComponent
-//    private lateinit var mUserComponent: UserComponent
-
     @Inject
     lateinit var dispatchingAndroidInjector: DispatchingAndroidInjector<Any>
 
     override fun onCreate() {
         super.onCreate()
 
-//        With AndroidInjector Builder
         DaggerAppComponent.builder()
             .netModule(
                 NetModule(
@@ -30,30 +26,9 @@ class SimpleApp : Application(), HasAndroidInjector {
             )
             .build()
             .inject(this)
-
-//        Basic builder
-//        mAppComponent = DaggerAppComponent.builder()
-//            .appModule(AppModule(this))
-//            .netModule(
-//                NetModule(
-//                    RetrofitClient.BASE_URL,
-//                    RetrofitClient.TOKEN
-//                )
-//            )
-//            .build()
-
-//        Define User dependent component
-//        mUserComponent = DaggerUserComponent.builder()
-//            .appComponent(mAppComponent)
-//            .userModule(UserModule())
-//            .build()
     }
 
     override fun androidInjector(): AndroidInjector<Any> {
         return dispatchingAndroidInjector
     }
-
-//    fun getAppComponent(): AppComponent = mAppComponent
-
-//    fun getUserComponent(): UserComponent = mUserComponent
 }

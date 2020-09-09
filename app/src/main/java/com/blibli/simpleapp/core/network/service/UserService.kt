@@ -10,7 +10,11 @@ import retrofit2.http.Query
 interface UserService {
 
     @GET("search/users")
-    fun getUsers(@Query("q") q: String): Observable<UserResponse>
+    fun getUsers(
+        @Query("q") q: String,
+        @Query("page") page: Int,
+        @Query("per_page") per_page: Int
+    ): Observable<UserResponse>
 
     @GET("users/{username}")
     fun getUserByUsername(@Path("username") username: String): Observable<User>
@@ -18,6 +22,8 @@ interface UserService {
     @GET("users/{username}/{category}")
     fun getUserByUsernameAndCategory(
         @Path("username") username: String,
-        @Path("category") category: String
+        @Path("category") category: String,
+        @Query("page") page: Int,
+        @Query("per_page") per_page: Int
     ): Observable<ArrayList<User>>
 }

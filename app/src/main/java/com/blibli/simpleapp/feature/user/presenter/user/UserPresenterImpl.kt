@@ -1,6 +1,8 @@
 package com.blibli.simpleapp.feature.user.presenter.user
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.blibli.simpleapp.core.di.scope.UserScope
 import com.blibli.simpleapp.core.network.service.UserService
 import com.blibli.simpleapp.core.util.RxHelper.ioToMain
@@ -19,19 +21,27 @@ class UserPresenterImpl @Inject constructor(private var service: UserService) :
     UserPresenterContract {
 
     private lateinit var view: UserViewContract
-    private var data: ArrayList<User> = arrayListOf()
+
+    private var _data: MutableLiveData<ArrayList<User>> = MutableLiveData(arrayListOf())
+    val data: LiveData<ArrayList<User>>
+        get() = _data
+
+    private var username: String = ""
+    private var id: Int = 0
+    private var page: Int = 1
+    private var perPage: Int = 10
+    private var isLoading: Boolean = false
     private var disposable: Disposable? = null
 
     override fun initData(id: Int, username: String) {
-        when (id) {
-            ApiCall.FETCH_SEARCH_RESULTS.ordinal -> fetchSearchResults(username)
-            ApiCall.FETCH_FOLLOWING_DATA.ordinal -> fetchFollowingData(username)
-            ApiCall.FETCH_FOLLOWERS_DATA.ordinal -> fetchFollowersData(username)
-        }
+        this.username = username
+        this.id = id
+
+        callApiFetch()
     }
 
-    override fun fetchSearchResults(username: String) {
-        service.getUsers(username)
+    override fun fetchSearchResults() {
+        service.getUsers(username, page, perPage)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<UserResponse> {
@@ -40,7 +50,10 @@ class UserPresenterImpl @Inject constructor(private var service: UserService) :
                 }
 
                 override fun onNext(t: UserResponse) {
-                    t.items?.let { list -> data = list }
+                    t.items?.let { list ->
+                        addToList(list, (page > 1))
+                    }
+                    Log.d("USER LIST", _data.value.toString())
                 }
 
                 override fun onError(e: Throwable) {
@@ -48,17 +61,18 @@ class UserPresenterImpl @Inject constructor(private var service: UserService) :
                 }
 
                 override fun onComplete() {
-                    view.setAdapter(data)
+                    _data.value?.let { view.setAdapter(it) }
+                    isLoading = false
                 }
             })
     }
 
-    override fun fetchFollowingData(username: String) {
-        fetchByCategory(username, "following", FETCH_FOLLOWING_FAILED)
+    override fun fetchFollowingData() {
+        fetchByCategory("following", FETCH_FOLLOWING_FAILED)
     }
 
-    override fun fetchFollowersData(username: String) {
-        fetchByCategory(username, "followers", FETCH_FOLLOWERS_FAILED)
+    override fun fetchFollowersData() {
+        fetchByCategory("followers", FETCH_FOLLOWERS_FAILED)
     }
 
     override fun onDestroy() {
@@ -69,9 +83,41 @@ class UserPresenterImpl @Inject constructor(private var service: UserService) :
         this.view = view
     }
 
-    private fun fetchByCategory(username: String, category: String, log: String) {
+    fun loadMore() {
+        page++
+        isLoading = true
+        _data.value?.let { list ->
+            list.add(User())
+            view.notifyItemInserted(list.size - 1)
+        }
+
+        callApiFetch()
+    }
+
+    private fun callApiFetch() {
+        when (id) {
+            ApiCall.FETCH_SEARCH_RESULTS.ordinal -> fetchSearchResults()
+            ApiCall.FETCH_FOLLOWING_DATA.ordinal -> fetchFollowingData()
+            ApiCall.FETCH_FOLLOWERS_DATA.ordinal -> fetchFollowersData()
+        }
+    }
+
+    private fun addToList(list: ArrayList<User>, update: Boolean) {
+        if (update) {
+            _data.value?.let { dataList ->
+                dataList.removeAt(dataList.size - 1)
+                dataList.addAll(list)
+                Log.d("USER LIST", dataList.toString())
+            }
+        } else {
+            _data.value = list
+            Log.d("USER LIST", _data.value.toString())
+        }
+    }
+
+    private fun fetchByCategory(category: String, log: String) {
         service
-            .getUserByUsernameAndCategory(username, category)
+            .getUserByUsernameAndCategory(username, category, page, perPage)
             .ioToMain()
             .subscribe(object : Observer<ArrayList<User>> {
                 override fun onSubscribe(d: Disposable) {
@@ -79,7 +125,7 @@ class UserPresenterImpl @Inject constructor(private var service: UserService) :
                 }
 
                 override fun onNext(t: ArrayList<User>) {
-                    data = t
+                    addToList(t, (page > 1))
                 }
 
                 override fun onError(e: Throwable) {
@@ -87,7 +133,8 @@ class UserPresenterImpl @Inject constructor(private var service: UserService) :
                 }
 
                 override fun onComplete() {
-                    view.setAdapter(data)
+                    _data.value?.let { view.setAdapter(it) }
+                    isLoading = false
                 }
             })
     }

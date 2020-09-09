@@ -7,9 +7,9 @@ interface UserPresenterContract : BasePresenter<UserViewContract> {
 
     fun initData(id: Int, username: String)
 
-    fun fetchSearchResults(username: String)
+    fun fetchSearchResults()
 
-    fun fetchFollowingData(username: String)
+    fun fetchFollowingData()
 
-    fun fetchFollowersData(username: String)
+    fun fetchFollowersData()
 }
