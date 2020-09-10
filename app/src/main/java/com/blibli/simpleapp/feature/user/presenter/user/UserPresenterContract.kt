@@ -9,7 +9,6 @@ interface UserPresenterContract : BasePresenter<UserViewContract> {
 
     fun fetchSearchResults()
 
-    fun fetchFollowingData()
+    fun fetchByCategory(category: String, log: String)
 
-    fun fetchFollowersData()
 }

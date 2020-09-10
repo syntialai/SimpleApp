@@ -67,14 +67,6 @@ class UserPresenterImpl @Inject constructor(private var service: UserService) :
             })
     }
 
-    override fun fetchFollowingData() {
-        fetchByCategory("following", FETCH_FOLLOWING_FAILED)
-    }
-
-    override fun fetchFollowersData() {
-        fetchByCategory("followers", FETCH_FOLLOWERS_FAILED)
-    }
-
     override fun onDestroy() {
         disposable?.dispose()
     }
@@ -94,28 +86,34 @@ class UserPresenterImpl @Inject constructor(private var service: UserService) :
         callApiFetch()
     }
 
-    private fun callApiFetch() {
+    fun callApiFetch() {
         when (id) {
             ApiCall.FETCH_SEARCH_RESULTS.ordinal -> fetchSearchResults()
-            ApiCall.FETCH_FOLLOWING_DATA.ordinal -> fetchFollowingData()
-            ApiCall.FETCH_FOLLOWERS_DATA.ordinal -> fetchFollowersData()
+            ApiCall.FETCH_FOLLOWING_DATA.ordinal -> fetchByCategory(
+                "following",
+                FETCH_FOLLOWING_FAILED
+            )
+            ApiCall.FETCH_FOLLOWERS_DATA.ordinal -> fetchByCategory(
+                "followers",
+                FETCH_FOLLOWERS_FAILED
+            )
         }
     }
 
-    private fun addToList(list: ArrayList<User>, update: Boolean) {
-        if (update) {
-            _data.value?.let { dataList ->
+    fun addToList(list: ArrayList<User>, update: Boolean) {
+        _data.value?.let { dataList ->
+            if (update) {
                 dataList.removeAt(dataList.size - 1)
-                dataList.addAll(list)
-                Log.d("USER LIST", dataList.toString())
+            } else {
+                dataList.clear()
             }
-        } else {
-            _data.value = list
-            Log.d("USER LIST", _data.value.toString())
+
+            dataList.addAll(list)
+            Log.d("USER LIST", dataList.toString())
         }
     }
 
-    private fun fetchByCategory(category: String, log: String) {
+    override fun fetchByCategory(category: String, log: String) {
         service
             .getUserByUsernameAndCategory(username, category, page, perPage)
             .ioToMain()
@@ -140,8 +138,8 @@ class UserPresenterImpl @Inject constructor(private var service: UserService) :
     }
 
     companion object {
-        private const val FETCH_FOLLOWING_FAILED = "FETCH FOLLOWING_FAILED"
-        private const val FETCH_FOLLOWERS_FAILED = "FETCH FOLLOWERS_FAILED"
-        private const val SEARCH_FAILED = "SEARCH FAILED"
+        const val FETCH_FOLLOWING_FAILED = "FETCH FOLLOWING_FAILED"
+        const val FETCH_FOLLOWERS_FAILED = "FETCH FOLLOWERS_FAILED"
+        const val SEARCH_FAILED = "SEARCH FAILED"
     }
 }
