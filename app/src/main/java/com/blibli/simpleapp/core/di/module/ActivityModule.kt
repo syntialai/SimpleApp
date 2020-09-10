@@ -6,21 +6,14 @@ import com.blibli.simpleapp.feature.user.view.main.MainActivity
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 
-//@Module(subcomponents = [ActivitySubcomponent::class])
 @Module
 abstract class ActivityModule {
 
-//    @Binds
-//    @IntoMap
-//    @ClassKey(Activity::class)
-//    abstract fun bindActivityFactory(factory: ActivitySubcomponent.Factory)
-//            : AndroidInjector.Factory<Activity>
-
-    // Generate automatically when no method or supertypes other than Factory
-    @ContributesAndroidInjector
+    @UserScope
+    @ContributesAndroidInjector(modules = [ViewModelModule::class])
     abstract fun contributeMainActivity(): MainActivity
 
     @UserScope
-    @ContributesAndroidInjector(modules = [UserModule::class])
+    @ContributesAndroidInjector(modules = [ViewModelModule::class])
     abstract fun contributeDetailActivity(): DetailActivity
 }

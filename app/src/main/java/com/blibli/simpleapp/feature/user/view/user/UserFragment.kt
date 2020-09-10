@@ -8,6 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,32 +19,35 @@ import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
 import com.blibli.simpleapp.feature.user.presenter.user.UserPresenterImpl
 import com.blibli.simpleapp.feature.user.view.detail.DetailActivity
+import com.blibli.simpleapp.feature.user.viewmodel.DetailViewModel
+import com.blibli.simpleapp.feature.user.viewmodel.UserViewModel
 import com.google.android.material.textview.MaterialTextView
 import dagger.android.support.AndroidSupportInjection
 import javax.inject.Inject
 
-class UserFragment : Fragment(), UserViewContract {
+class UserFragment : Fragment() {
 
-    private var columnCount = 1
-    private var apiId = ApiCall.FETCH_SEARCH_RESULTS.ordinal
-    private var username: String? = null
-    private var isLoading: Boolean = false
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private val viewModel: UserViewModel by lazy {
+        ViewModelProviders.of(this, viewModelFactory).get(UserViewModel::class.java)
+    }
 
     private var adapter = UserAdapter()
 
     private lateinit var rvUsers: RecyclerView
     private lateinit var tvNoUsers: MaterialTextView
 
-    @Inject
-    lateinit var presenter: UserPresenterImpl
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         arguments?.let {
-            columnCount = it.getInt(ARG_COLUMN_COUNT)
-            apiId = it.getInt(ARG_API_ID)
-            username = it.getString(ARG_USER_NAME)
+            val columnCount = it.getInt(ARG_COLUMN_COUNT)
+            val apiId = it.getInt(ARG_API_ID)
+            val username = it.getString(ARG_USER_NAME)
+
+            viewModel.initData(apiId, username, columnCount)
         }
     }
 
@@ -54,10 +59,17 @@ class UserFragment : Fragment(), UserViewContract {
 
         initVar(view)
 
-        username?.let { name ->
-            presenter.initData(apiId, name)
-        }
-        presenter.injectView(this)
+        viewModel.isInserted.observe(viewLifecycleOwner, {
+            if (it != -1) {
+                notifyItemInserted(it)
+            }
+        })
+
+        viewModel.isLoading.observe(viewLifecycleOwner, {
+            if (!it) {
+                viewModel.data.value?.let { dataList -> setAdapter(dataList) }
+            }
+        })
 
         return view
     }
@@ -67,24 +79,30 @@ class UserFragment : Fragment(), UserViewContract {
         AndroidSupportInjection.inject(this)
     }
 
-    override fun setAdapter(userList: ArrayList<User>) {
+    override fun onDestroy() {
+        viewModel.onDestroy()
+        super.onDestroy()
+    }
+
+    private fun setAdapter(userList: ArrayList<User>) {
         adapter.updateList(userList)
         showRecyclerView(userList.size > 0)
     }
 
-    override fun notifyItemInserted(position: Int) {
+    private fun notifyItemInserted(position: Int) {
         adapter.notifyItemInserted(position)
     }
 
-    override fun initVar(view: View?) {
+    private fun initVar(view: View?) {
         view?.let {
             tvNoUsers = it.findViewById(R.id.tv_no_users)
             rvUsers = it.findViewById(R.id.rv_users)
         }
-        setupRV()
+
+        viewModel.columnCount.value?.let { setupRV(it) }
     }
 
-    private fun setupRV() {
+    private fun setupRV(columnCount: Int) {
         rvUsers.layoutManager = if (columnCount == 1) {
             LinearLayoutManager(context)
         } else {
@@ -105,12 +123,12 @@ class UserFragment : Fragment(), UserViewContract {
                 val layoutManager: LinearLayoutManager =
                     recyclerView.layoutManager as LinearLayoutManager
 
-                if (!isLoading) {
+                if (!viewModel.isLoading.value!!) {
                     if (layoutManager != null
                         && layoutManager.findLastCompletelyVisibleItemPosition()
-                        == (presenter.data.value?.size ?: 0) - 1
+                        == (viewModel.data.value?.size ?: 0) - 1
                     ) {
-                        presenter.loadMore()
+                        viewModel.loadMore()
                     }
                 }
             }

@@ -3,9 +3,10 @@ package com.blibli.simpleapp.feature.user.view.detail
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.blibli.simpleapp.R
@@ -13,8 +14,8 @@ import com.blibli.simpleapp.core.util.ImageHelper
 import com.blibli.simpleapp.core.util.ResourcesHelper
 import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
-import com.blibli.simpleapp.feature.user.presenter.detail.DetailPresenterImpl
 import com.blibli.simpleapp.feature.user.view.user.UserFragment
+import com.blibli.simpleapp.feature.user.viewmodel.DetailViewModel
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
@@ -22,35 +23,47 @@ import com.google.android.material.textview.MaterialTextView
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
-
-class DetailActivity : AppCompatActivity(), DetailViewContract {
+class DetailActivity : AppCompatActivity() {
 
     @Inject
-    lateinit var presenter: DetailPresenterImpl
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private val viewModel: DetailViewModel by lazy {
+        ViewModelProviders.of(this, viewModelFactory).get(DetailViewModel::class.java)
+    }
 
     private lateinit var tvUsername: MaterialTextView
     private lateinit var tvFollowing: MaterialTextView
     private lateinit var tvFollowers: MaterialTextView
     private lateinit var tvRepos: MaterialTextView
     private lateinit var ivUserImage: ShapeableImageView
-
     private lateinit var tabLayout: TabLayout
     private lateinit var viewPager: ViewPager2
 
-    private var username = ""
-
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
-        presenter.injectView(this)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 
         getUsernameIntent()
         initVar()
+
+        viewModel.username.observe(this, {
+            setupViewPager(it)
+        })
+
+        viewModel.isLoadingData.observe(this, {
+            viewModel.data.value?.let { data -> putDataToUI(data) }
+        })
     }
 
-    override fun initVar(view: View?) {
+    override fun onDestroy() {
+        viewModel.onDestroy()
+        super.onDestroy()
+    }
+
+    private fun initVar() {
         tvUsername = findViewById(R.id.tv_user_detail_username)
         tvFollowing = findViewById(R.id.tv_user_detail_following)
         tvFollowers = findViewById(R.id.tv_user_detail_followers)
@@ -59,11 +72,11 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
         tabLayout = findViewById(R.id.tab_users)
         viewPager = findViewById(R.id.viewpager_user)
 
-        setupViewPager()
+        setupViewPager(viewModel.username.value!!)
         setupTabs()
     }
 
-    override fun putDataToUI(data: User) {
+    private fun putDataToUI(data: User) {
         val context = applicationContext
         data.let { user ->
             user.avatar_url?.let { image ->
@@ -92,7 +105,7 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
         }.attach()
     }
 
-    private fun setupViewPager() {
+    private fun setupViewPager(username: String) {
         viewPager.adapter = object : FragmentStateAdapter(this) {
 
             override fun getItemCount(): Int = 2
@@ -114,8 +127,7 @@ class DetailActivity : AppCompatActivity(), DetailViewContract {
     private fun getUsernameIntent() {
         val usernameFromIntent = intent.getStringExtra(UserFragment.ARG_USER_NAME)
         usernameFromIntent?.let {
-            username = it
-            presenter.fetchData(it)
+            viewModel.fetchData(it)
         }
     }
 

@@ -5,7 +5,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import com.blibli.simpleapp.feature.user.view.main.MainViewContract
 
-abstract class BaseActivity : AppCompatActivity(), MainViewContract {
+abstract class BaseActivity : AppCompatActivity() {
 
     fun hideKeyboard() {
         val view = this.currentFocus

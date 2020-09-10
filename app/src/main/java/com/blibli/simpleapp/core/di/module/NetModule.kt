@@ -11,7 +11,10 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Module
-class NetModule(private val mBaseUrl: String, private val mToken: String) {
+class NetModule {
+
+    private val BASE_URL = "https://api.github.com/"
+    private val TOKEN = "97594694f9d152352bb26dc38901039c5b231bbf"
 
     @Provides
     @Singleton
@@ -19,7 +22,7 @@ class NetModule(private val mBaseUrl: String, private val mToken: String) {
         return Interceptor { chain ->
             val request = chain.request().newBuilder().addHeader(
                 "Authorization",
-                "token $mToken"
+                "token $TOKEN"
             ).build()
             chain.proceed(request)
         }
@@ -47,7 +50,7 @@ class NetModule(private val mBaseUrl: String, private val mToken: String) {
         rxAdapter: RxJava2CallAdapterFactory
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(mBaseUrl)
+            .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(rxAdapter)
             .client(okHttpClient)

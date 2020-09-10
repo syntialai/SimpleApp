@@ -5,41 +5,44 @@ import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProviders
 import com.blibli.simpleapp.R
 import com.blibli.simpleapp.core.base.BaseActivity
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
-import com.blibli.simpleapp.feature.user.presenter.main.MainPresenterImpl
 import com.blibli.simpleapp.feature.user.view.user.UserFragment
+import com.blibli.simpleapp.feature.user.viewmodel.MainViewModel
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 class MainActivity : BaseActivity() {
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private val viewModel: MainViewModel by lazy {
+        ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
+    }
+
     private lateinit var svUser: SearchView
     private lateinit var fragmentManager: FragmentManager
 
-    private var username: String = ""
-
-    @Inject
-    lateinit var presenter: MainPresenterImpl
-
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
-        presenter.injectView(this)
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         initVar()
-        initState(savedInstanceState)
+
+        viewModel.query.observe(this, {
+            it?.let {
+                showUserFragment(it)
+            }
+        })
     }
 
-    override fun onSaveInstanceState(outState: Bundle) {
-        outState.putString(QUERY, username)
-        super.onSaveInstanceState(outState)
-    }
-
-    override fun showUserFragment(query: String) {
+    private fun showUserFragment(query: String) {
         val userFragment = UserFragment.newInstance(1, ApiCall.FETCH_SEARCH_RESULTS.ordinal, query)
 
         val fragmentTransaction: FragmentTransaction = fragmentManager
@@ -55,7 +58,7 @@ class MainActivity : BaseActivity() {
         ).addToBackStack(null).commit()
     }
 
-    override fun initVar(view: View?) {
+    private fun initVar() {
         fragmentManager = supportFragmentManager
 
         svUser = findViewById(R.id.sv_search_user)
@@ -63,8 +66,7 @@ class MainActivity : BaseActivity() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let {
                     hideKeyboard()
-                    username = it
-                    presenter.onSearchQuerySubmitted(it)
+                    viewModel.onSearchQuerySubmitted(it)
                 }
                 return true
             }
@@ -73,19 +75,5 @@ class MainActivity : BaseActivity() {
                 return true
             }
         })
-    }
-
-    private fun initState(savedInstanceState: Bundle?) {
-        if (savedInstanceState != null) {
-            val savedQuery = savedInstanceState.getString(QUERY)
-            savedQuery?.let {
-                svUser.setQuery(it, true)
-                showUserFragment(it)
-            }
-        }
-    }
-
-    companion object {
-        private const val QUERY = "QUERY"
     }
 }

@@ -18,12 +18,6 @@ class SimpleApp : Application(), HasAndroidInjector {
         super.onCreate()
 
         DaggerAppComponent.builder()
-            .netModule(
-                NetModule(
-                    RetrofitClient.BASE_URL,
-                    RetrofitClient.TOKEN
-                )
-            )
             .build()
             .inject(this)
     }
