@@ -138,7 +138,6 @@ class UserViewModel @Inject constructor(
                     } as ArrayList<User>
 
                     addToList(list, false)
-                    _isLoading.value = false
                 }
 
                 override fun onError(e: Throwable) {
@@ -147,6 +146,7 @@ class UserViewModel @Inject constructor(
                 }
 
                 override fun onComplete() {
+                    Log.d("isLoading ${_isLoading.value}", _data.value.toString())
                     _isLoading.value = false
                 }
             })
@@ -163,6 +163,8 @@ class UserViewModel @Inject constructor(
             dataList.addAll(list)
             Log.d("USER LIST", dataList.toString())
         }
+
+        _isLoading.value = false
     }
 
     private fun fetchByCategory(category: String, log: String) {
