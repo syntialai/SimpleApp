@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.blibli.simpleapp.core.network.service.UserService
 import com.blibli.simpleapp.core.util.RxHelper.ioToMain
+import com.blibli.simpleapp.feature.user.db.repository.UserRepository
 import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
 import com.blibli.simpleapp.feature.user.model.response.UserResponse
@@ -13,7 +14,10 @@ import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
 import javax.inject.Inject
 
-class UserViewModel @Inject constructor(private var service: UserService) : ViewModel() {
+class UserViewModel @Inject constructor(
+    private var service: UserService,
+    private var repository: UserRepository
+) : ViewModel() {
 
     private var _data: MutableLiveData<ArrayList<User>> = MutableLiveData(arrayListOf())
     val data: LiveData<ArrayList<User>>
@@ -116,7 +120,36 @@ class UserViewModel @Inject constructor(private var service: UserService) : View
                 "followers",
                 FETCH_FOLLOWERS_FAILED
             )
+            ApiCall.FETCH_DB.ordinal -> fetchDb()
         }
+    }
+
+    private fun fetchDb() {
+        repository.getUsers()
+            .ioToMain()
+            .subscribe(object: Observer<List<com.blibli.simpleapp.feature.user.db.model.User>>{
+                override fun onSubscribe(d: Disposable) {
+                    _disposable.value = d
+                }
+
+                override fun onNext(t: List<com.blibli.simpleapp.feature.user.db.model.User>) {
+                    val list = t.map {
+                        it.toUserModule()
+                    } as ArrayList<User>
+
+                    addToList(list, false)
+                    _isLoading.value = false
+                }
+
+                override fun onError(e: Throwable) {
+                    Log.d("ERROR ROOM", e.toString())
+                    _isLoading.value = false
+                }
+
+                override fun onComplete() {
+                    _isLoading.value = false
+                }
+            })
     }
 
     fun addToList(list: ArrayList<User>, update: Boolean) {
@@ -152,11 +185,23 @@ class UserViewModel @Inject constructor(private var service: UserService) : View
                     }
 
                     override fun onComplete() {
-//                        _data.value?.let { view.setAdapter(it) }
                         _isLoading.value = false
                     }
                 })
         }
+    }
+
+    private fun com.blibli.simpleapp.feature.user.db.model.User.toUserModule(): User {
+
+        return User(
+            this.login,
+            this.avatar_url,
+            this.public_repos,
+            this.followers,
+            this.following,
+            this.followers_url,
+            this.following_url
+        )
     }
 
     companion object {

@@ -1,5 +1,6 @@
 package com.blibli.simpleapp.core.di.component
 
+import android.app.Application
 import com.blibli.simpleapp.SimpleApp
 import com.blibli.simpleapp.core.di.module.*
 import dagger.Component
@@ -20,4 +21,6 @@ import javax.inject.Singleton
 interface AppComponent {
 
     fun inject(application: SimpleApp)
+
+    fun application(): Application
 }

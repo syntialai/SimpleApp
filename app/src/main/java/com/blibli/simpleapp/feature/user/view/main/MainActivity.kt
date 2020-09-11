@@ -1,6 +1,10 @@
 package com.blibli.simpleapp.feature.user.view.main
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.FragmentManager
@@ -10,6 +14,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.blibli.simpleapp.R
 import com.blibli.simpleapp.core.base.BaseActivity
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
+import com.blibli.simpleapp.feature.user.view.savedUser.SavedUserActivity
 import com.blibli.simpleapp.feature.user.view.user.UserFragment
 import com.blibli.simpleapp.feature.user.viewmodel.MainViewModel
 import dagger.android.AndroidInjection
@@ -40,6 +45,21 @@ class MainActivity : BaseActivity() {
                 showUserFragment(it)
             }
         })
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_item, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.options -> {
+                startActivity(Intent(applicationContext, SavedUserActivity::class.java))
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     private fun showUserFragment(query: String) {

@@ -29,6 +29,14 @@ android {
         }
     }
 
+    packagingOptions {
+        exclude 'META-INF/atomicfu.kotlin_module'
+    }
+
+    kapt {
+        correctErrorTypes = true
+    }
+
     testOptions {
         unitTests.includeAndroidResources = true
         unitTests.returnDefaultValues = true
@@ -76,4 +84,11 @@ dependencies {
     implementation 'com.google.dagger:dagger-android-support:2.27'
     kapt 'com.google.dagger:dagger-android-processor:2.27'
     kapt 'com.google.dagger:dagger-compiler:2.27'
+
+    // Room
+    implementation "androidx.room:room-runtime:2.2.5"
+    implementation "androidx.room:room-rxjava2:2.2.5"
+    kapt "androidx.room:room-compiler:2.2.5"
+    implementation "androidx.room:room-ktx:2.2.5"
+    androidTestImplementation "androidx.room:room-testing:2.2.5"
 }

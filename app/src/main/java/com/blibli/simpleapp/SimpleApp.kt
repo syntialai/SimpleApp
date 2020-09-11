@@ -2,6 +2,7 @@ package com.blibli.simpleapp
 
 import android.app.Application
 import com.blibli.simpleapp.core.di.component.DaggerAppComponent
+import com.blibli.simpleapp.core.di.module.AppModule
 import com.blibli.simpleapp.core.di.module.NetModule
 import com.blibli.simpleapp.core.network.builder.RetrofitClient
 import dagger.android.AndroidInjector
@@ -18,6 +19,7 @@ class SimpleApp : Application(), HasAndroidInjector {
         super.onCreate()
 
         DaggerAppComponent.builder()
+            .appModule(AppModule(this))
             .build()
             .inject(this)
     }
