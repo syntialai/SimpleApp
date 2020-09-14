@@ -12,7 +12,6 @@ import androidx.viewpager2.widget.ViewPager2
 import com.blibli.simpleapp.R
 import com.blibli.simpleapp.core.util.ImageHelper
 import com.blibli.simpleapp.core.util.ResourcesHelper
-import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
 import com.blibli.simpleapp.feature.user.view.user.UserFragment
 import com.blibli.simpleapp.feature.user.viewmodel.DetailViewModel
@@ -58,11 +57,6 @@ class DetailActivity : AppCompatActivity() {
         })
     }
 
-    override fun onDestroy() {
-        viewModel.onDestroy()
-        super.onDestroy()
-    }
-
     private fun initVar() {
         tvUsername = findViewById(R.id.tv_user_detail_username)
         tvFollowing = findViewById(R.id.tv_user_detail_following)
@@ -76,7 +70,7 @@ class DetailActivity : AppCompatActivity() {
         setupTabs()
     }
 
-    private fun putDataToUI(data: User) {
+    private fun putDataToUI(data: com.blibli.simpleapp.feature.user.db.model.User) {
         val context = applicationContext
         data.let { user ->
             user.avatar_url?.let { image ->

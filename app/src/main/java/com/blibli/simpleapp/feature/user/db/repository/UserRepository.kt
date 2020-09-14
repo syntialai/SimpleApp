@@ -2,38 +2,105 @@ package com.blibli.simpleapp.feature.user.db.repository
 
 import android.app.Application
 import android.util.Log
-import androidx.lifecycle.LiveData
+import com.blibli.simpleapp.core.di.scope.UserScope
 import com.blibli.simpleapp.core.network.service.UserService
 import com.blibli.simpleapp.feature.user.db.builder.RoomDB
-import com.blibli.simpleapp.feature.user.db.dao.UserDAO
 import com.blibli.simpleapp.feature.user.db.model.User
-import io.reactivex.Observable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-class UserRepository @Inject constructor(private var application: Application) {
+@UserScope
+class UserRepository @Inject constructor(
+    application: Application,
+    private var userService: UserService
+) {
 
     private val userDAO = RoomDB.getDatabase(application).userDao()
 
-    fun getUserByUsername(username: String): User? {
-        return userDAO.getUserByUsername(username)
+    suspend fun showUser(username: String) = withContext(Dispatchers.IO) {
+        val user = getUserByUsername(username)
+
+        if (user != null) {
+            return@withContext user
+        } else {
+            val userApi = fetchUserByUsername(username).toUserModule()
+            addUser(userApi)
+            return@withContext userApi
+        }
     }
 
-    fun getUsers(): Observable<List<User>> {
-        return userDAO.getUsers()
+    suspend fun getUsers() = withContext(Dispatchers.Default) {
+        userDAO.getUsers().map {
+            it.toUserModule()
+        } as ArrayList<com.blibli.simpleapp.feature.user.model.User>
     }
 
-//    fun addUsers(vararg users: User) {
-//        userDAO.addUsers(*users)
-//    }
-//
-    suspend fun addUser(user: User) {
-        userDAO.addUser(user)
-        Log.d("User", "added with username ${user.login}")
+        suspend fun fetchUsers(query: String, page: Int, perPage: Int) =
+            withContext(Dispatchers.Default) {
+                return@withContext userService.getUsers(query, page, perPage)
+            }
+
+        suspend fun fetchUserByUsernameAndCategory(
+            username: String,
+            category: String,
+            page: Int,
+            perPage: Int
+        ) =
+            withContext(Dispatchers.Default) {
+                return@withContext userService.getUserByUsernameAndCategory(
+                    username,
+                    category,
+                    page,
+                    perPage
+                )
+            }
+
+        private suspend fun fetchUserByUsername(username: String) =
+            withContext(Dispatchers.Default) {
+                return@withContext userService.getUserByUsername(username)
+            }
+
+        private fun getUserByUsername(username: String) =
+            userDAO.getUserByUsername(username)
+
+        private fun addUser(user: User) {
+            userDAO.addUser(user)
+            Log.d("User", "added with username ${user.login}")
+        }
+
+        private fun com.blibli.simpleapp.feature.user.model.User.toUserModule(): User {
+
+            return User(
+                null,
+                this.login,
+                this.avatar_url,
+                this.public_repos,
+                this.followers,
+                this.following,
+                this.followers_url,
+                this.following_url
+            )
+        }
+
+        private fun User.toUserModule(): com.blibli.simpleapp.feature.user.model.User {
+
+            return com.blibli.simpleapp.feature.user.model.User(
+                this.login,
+                this.avatar_url,
+                this.public_repos,
+                this.followers,
+                this.following,
+                this.followers_url,
+                this.following_url
+            )
+        }
+
+        fun addUsers(vararg users: User) {
+            userDAO.addUsers(*users)
+        }
+
+        fun deleteUsers(vararg users: User) {
+            userDAO.deleteUsers(*users)
+        }
     }
-//
-//    fun deleteUsers(vararg users: User) {
-//        userDAO.deleteUsers(*users)
-//    }
-}

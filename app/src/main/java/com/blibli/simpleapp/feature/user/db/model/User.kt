@@ -3,7 +3,6 @@ package com.blibli.simpleapp.feature.user.db.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.blibli.simpleapp.feature.user.model.User
 
 @Entity(tableName = "user_table")
 data class User(

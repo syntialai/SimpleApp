@@ -4,18 +4,15 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.blibli.simpleapp.core.network.service.UserService
-import com.blibli.simpleapp.core.util.RxHelper.ioToMain
+import androidx.lifecycle.viewModelScope
 import com.blibli.simpleapp.feature.user.db.repository.UserRepository
 import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
-import com.blibli.simpleapp.feature.user.model.response.UserResponse
-import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class UserViewModel @Inject constructor(
-    private var service: UserService,
     private var repository: UserRepository
 ) : ViewModel() {
 
@@ -43,7 +40,6 @@ class UserViewModel @Inject constructor(
 
     private val _page = MutableLiveData<Int>()
     private val _perPage = MutableLiveData<Int>()
-    private val _disposable = MutableLiveData<Disposable?>()
 
     init {
         _id.value = 0
@@ -52,7 +48,6 @@ class UserViewModel @Inject constructor(
         _perPage.value = 10
         _isInserted.value = -1
         _isLoading.value = true
-        _disposable.value = null
     }
 
     fun initData(id: Int?, username: String?, column: Int?) {
@@ -65,35 +60,13 @@ class UserViewModel @Inject constructor(
 
     private fun fetchSearchResults() {
         _username.value?.let {
-            service.getUsers(it, _page.value!!, _perPage.value!!)
-                .ioToMain()
-                .subscribe(object : Observer<UserResponse> {
-                    override fun onSubscribe(d: Disposable) {
-                        _disposable.value = d
-                        _isLoading.value = true
+            launchDataLoad({
+                repository.fetchUsers(it, _page.value!!, _perPage.value!!)
+                    .items?.let {
+                        addToList(it, (_page.value!! > 1))
                     }
-
-                    override fun onNext(t: UserResponse) {
-                        t.items?.let { list ->
-                            addToList(list, (_page.value!! > 1))
-                        }
-                        Log.d("USER LIST", _data.value.toString())
-                    }
-
-                    override fun onError(e: Throwable) {
-                        Log.d(SEARCH_FAILED, e.toString())
-                        _isLoading.value = false
-                    }
-
-                    override fun onComplete() {
-                        _isLoading.value = false
-                    }
-                })
+            }, SEARCH_FAILED)
         }
-    }
-
-    fun onDestroy() {
-        _disposable.value?.dispose()
     }
 
     fun loadMore() {
@@ -125,31 +98,9 @@ class UserViewModel @Inject constructor(
     }
 
     private fun fetchDb() {
-        repository.getUsers()
-            .ioToMain()
-            .subscribe(object: Observer<List<com.blibli.simpleapp.feature.user.db.model.User>>{
-                override fun onSubscribe(d: Disposable) {
-                    _disposable.value = d
-                }
-
-                override fun onNext(t: List<com.blibli.simpleapp.feature.user.db.model.User>) {
-                    val list = t.map {
-                        it.toUserModule()
-                    } as ArrayList<User>
-
-                    addToList(list, false)
-                }
-
-                override fun onError(e: Throwable) {
-                    Log.d("ERROR ROOM", e.toString())
-                    _isLoading.value = false
-                }
-
-                override fun onComplete() {
-                    Log.d("isLoading ${_isLoading.value}", _data.value.toString())
-                    _isLoading.value = false
-                }
-            })
+        launchDataLoad({
+            addToList(repository.getUsers(), false)
+        }, ROOM_GET_USERS_FAILED)
     }
 
     fun addToList(list: ArrayList<User>, update: Boolean) {
@@ -161,54 +112,42 @@ class UserViewModel @Inject constructor(
             }
 
             dataList.addAll(list)
-            Log.d("USER LIST", dataList.toString())
+            Log.d(USER_LIST, dataList.toString())
         }
-
-        _isLoading.value = false
     }
 
     private fun fetchByCategory(category: String, log: String) {
         username.value?.let {
-            service
-                .getUserByUsernameAndCategory(it, category, _page.value!!, _perPage.value!!)
-                .ioToMain()
-                .subscribe(object : Observer<ArrayList<User>> {
-                    override fun onSubscribe(d: Disposable) {
-                        _disposable.value = d
-                    }
-
-                    override fun onNext(t: ArrayList<User>) {
-                        addToList(t, (_page.value!! > 1))
-                    }
-
-                    override fun onError(e: Throwable) {
-                        Log.d(log, e.toString())
-                        _isLoading.value = false
-                    }
-
-                    override fun onComplete() {
-                        _isLoading.value = false
-                    }
-                })
+            launchDataLoad({
+                val users = repository.fetchUserByUsernameAndCategory(
+                    it,
+                    category,
+                    _page.value!!,
+                    _perPage.value!!
+                )
+                addToList(users, (_page.value!! > 1))
+            }, log)
         }
     }
 
-    private fun com.blibli.simpleapp.feature.user.db.model.User.toUserModule(): User {
-
-        return User(
-            this.login,
-            this.avatar_url,
-            this.public_repos,
-            this.followers,
-            this.following,
-            this.followers_url,
-            this.following_url
-        )
+    private fun launchDataLoad(block: suspend () -> Unit, log: String): Job {
+        return viewModelScope.launch {
+            try {
+                _isLoading.value = true
+                block()
+            } catch (error: Throwable) {
+                Log.d(log, error.toString())
+            } finally {
+                _isLoading.value = false
+            }
+        }
     }
 
     companion object {
         const val FETCH_FOLLOWING_FAILED = "FETCH FOLLOWING_FAILED"
         const val FETCH_FOLLOWERS_FAILED = "FETCH FOLLOWERS_FAILED"
         const val SEARCH_FAILED = "SEARCH FAILED"
+        const val ROOM_GET_USERS_FAILED = "ROOM_GET_USERS_FAILED"
+        const val USER_LIST = "USER LIST"
     }
 }

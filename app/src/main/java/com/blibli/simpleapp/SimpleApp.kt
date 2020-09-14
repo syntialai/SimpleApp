@@ -3,8 +3,6 @@ package com.blibli.simpleapp
 import android.app.Application
 import com.blibli.simpleapp.core.di.component.DaggerAppComponent
 import com.blibli.simpleapp.core.di.module.AppModule
-import com.blibli.simpleapp.core.di.module.NetModule
-import com.blibli.simpleapp.core.network.builder.RetrofitClient
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
 import dagger.android.HasAndroidInjector

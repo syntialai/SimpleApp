@@ -3,7 +3,6 @@ package com.blibli.simpleapp.core.base
 import android.content.Context
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
-import com.blibli.simpleapp.feature.user.view.main.MainViewContract
 
 abstract class BaseActivity : AppCompatActivity() {
 
