@@ -48,13 +48,15 @@ class DetailActivity : AppCompatActivity() {
         getUsernameIntent()
         initVar()
 
-        viewModel.username.observe(this, {
-            setupViewPager(it)
-        })
+        with(viewModel) {
+            username.observe(this@DetailActivity, {
+                setupViewPager(it)
+            })
 
-        viewModel.isLoadingData.observe(this, {
-            viewModel.data.value?.let { data -> putDataToUI(data) }
-        })
+            isLoadingData.observe(this@DetailActivity, {
+                viewModel.data.value?.let { data -> putDataToUI(data) }
+            })
+        }
     }
 
     private fun initVar() {

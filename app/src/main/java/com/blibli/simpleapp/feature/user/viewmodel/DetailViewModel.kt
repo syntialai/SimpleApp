@@ -4,16 +4,20 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.blibli.simpleapp.feature.user.db.model.User
 import com.blibli.simpleapp.feature.user.db.repository.UserRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class DetailViewModel @Inject constructor(
     private var repository: UserRepository
 ) : ViewModel() {
+
+    private val coroutineScope = CoroutineScope(Job() + Dispatchers.Main)
 
     private val _username = MutableLiveData<String>()
     val username: LiveData<String>
@@ -36,13 +40,14 @@ class DetailViewModel @Inject constructor(
         _username.value = username
 
         launchDataLoad {
-            val user = repository.showUser(username)
-            _data.value = user
+            repository.showUser(username).collect {
+                _data.value = it
+            }
         }
     }
 
-    private fun launchDataLoad(block: suspend () -> Unit): Job {
-        return viewModelScope.launch {
+    private fun launchDataLoad(block: suspend () -> Unit) {
+        coroutineScope.launch {
             try {
                 _isLoadingData.value = true
                 block()

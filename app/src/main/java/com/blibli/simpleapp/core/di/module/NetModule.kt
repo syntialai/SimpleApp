@@ -14,7 +14,7 @@ import javax.inject.Singleton
 class NetModule {
 
     private val BASE_URL = "https://api.github.com/"
-    private val TOKEN = "a6f3f45998d0755c5b1761146b93ea5fc806af43"
+    private val TOKEN = "fdc483efb2340e3b47449a43bf00a71246e7547d"
 
     @Provides
     @Singleton

@@ -65,8 +65,7 @@ class UserAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         val progressBar: ProgressBar = view.findViewById(R.id.progress_bar_circular)
     }
 
-    private fun showLoadingView(holder: LoadingViewHolder, position: Int) {
-    }
+    private fun showLoadingView(holder: LoadingViewHolder, position: Int) {}
 
     private fun populateItemRows(holder: ItemViewHolder, position: Int) {
         val item = users[position]

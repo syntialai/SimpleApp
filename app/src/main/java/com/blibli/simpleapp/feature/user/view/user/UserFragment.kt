@@ -55,17 +55,20 @@ class UserFragment : Fragment() {
 
         initVar(view)
 
-        viewModel.isInserted.observe(viewLifecycleOwner, {
-            if (it != -1) {
-                notifyItemInserted(it)
-            }
-        })
+        with(viewModel) {
 
-        viewModel.isLoading.observe(viewLifecycleOwner, {
-            if (!it) {
-                viewModel.data.value?.let { dataList -> setAdapter(dataList) }
-            }
-        })
+            isInserted.observe(viewLifecycleOwner, {
+                if (it != -1) {
+                    notifyItemInserted(it)
+                }
+            })
+
+            isLoading.observe(viewLifecycleOwner, {
+                if (!it) {
+                    viewModel.data.value?.let { dataList -> setAdapter(dataList) }
+                }
+            })
+        }
 
         return view
     }

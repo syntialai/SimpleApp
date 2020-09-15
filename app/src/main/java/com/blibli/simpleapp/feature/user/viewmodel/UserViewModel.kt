@@ -4,17 +4,21 @@ import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.blibli.simpleapp.feature.user.db.repository.UserRepository
 import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class UserViewModel @Inject constructor(
     private var repository: UserRepository
 ) : ViewModel() {
+
+    private val coroutineScope = CoroutineScope(Job() + Dispatchers.Main)
 
     private var _data: MutableLiveData<ArrayList<User>> = MutableLiveData(arrayListOf())
     val data: LiveData<ArrayList<User>>
@@ -62,8 +66,10 @@ class UserViewModel @Inject constructor(
         _username.value?.let {
             launchDataLoad({
                 repository.fetchUsers(it, _page.value!!, _perPage.value!!)
-                    .items?.let {
-                        addToList(it, (_page.value!! > 1))
+                    .collect { response ->
+                        response.items?.let { list ->
+                            addToList(list, (_page.value!! > 1))
+                        }
                     }
             }, SEARCH_FAILED)
         }
@@ -99,39 +105,50 @@ class UserViewModel @Inject constructor(
 
     private fun fetchDb() {
         launchDataLoad({
-            addToList(repository.getUsers(), false)
+            repository.getUsers().collect {
+                addToList(it, false)
+            }
         }, ROOM_GET_USERS_FAILED)
     }
 
-    fun addToList(list: ArrayList<User>, update: Boolean) {
-        _data.value?.let { dataList ->
-            if (update) {
-                dataList.removeAt(dataList.size - 1)
-            } else {
-                dataList.clear()
-            }
-
-            dataList.addAll(list)
-            Log.d(USER_LIST, dataList.toString())
+    private fun addToList(list: ArrayList<User>, update: Boolean) {
+        if (update) {
+            removeDataLastElm()
+        } else {
+            clearData()
         }
+
+        _data.value?.addAll(list)
+        Log.d(USER_LIST, _data.value.toString())
+    }
+
+    private fun removeDataLastElm() {
+        _data.value?.let {
+            it.removeAt(it.size - 1)
+        }
+    }
+
+    private fun clearData() {
+        _data.value?.clear()
     }
 
     private fun fetchByCategory(category: String, log: String) {
         username.value?.let {
             launchDataLoad({
-                val users = repository.fetchUserByUsernameAndCategory(
+                repository.fetchUserByUsernameAndCategory(
                     it,
                     category,
                     _page.value!!,
                     _perPage.value!!
-                )
-                addToList(users, (_page.value!! > 1))
+                ).collect {
+                    addToList(it, (_page.value!! > 1))
+                }
             }, log)
         }
     }
 
-    private fun launchDataLoad(block: suspend () -> Unit, log: String): Job {
-        return viewModelScope.launch {
+    private fun launchDataLoad(block: suspend () -> Unit, log: String) {
+        coroutineScope.launch {
             try {
                 _isLoading.value = true
                 block()
