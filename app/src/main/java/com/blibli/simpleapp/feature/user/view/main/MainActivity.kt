@@ -1,5 +1,6 @@
 package com.blibli.simpleapp.feature.user.view.main
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -11,6 +12,10 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import com.blibli.simpleapp.R
 import com.blibli.simpleapp.core.base.BaseActivity
+import com.blibli.simpleapp.core.util.ToastHelper
+import com.blibli.simpleapp.feature.service.BackgroundService
+import com.blibli.simpleapp.feature.service.BoundService
+import com.blibli.simpleapp.feature.service.ForegroundService
 import com.blibli.simpleapp.feature.user.model.enums.ApiCall
 import com.blibli.simpleapp.feature.user.view.savedUser.SavedUserActivity
 import com.blibli.simpleapp.feature.user.view.user.UserFragment
@@ -18,10 +23,15 @@ import com.blibli.simpleapp.feature.user.viewmodel.MainViewModel
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
+
 class MainActivity : BaseActivity() {
 
     @Inject
     lateinit var viewModelFactory: ViewModelProvider.Factory
+
+    private lateinit var intentService: Intent
+    private lateinit var intentFgService: Intent
+    private lateinit var intentBoundService: Intent
 
     private val viewModel: MainViewModel by lazy {
         ViewModelProviders.of(this, viewModelFactory).get(MainViewModel::class.java)
@@ -37,17 +47,29 @@ class MainActivity : BaseActivity() {
         setContentView(R.layout.activity_main)
 
         initVar()
+        intentService = Intent(this, BackgroundService::class.java)
+        intentFgService = Intent(this, ForegroundService::class.java)
+        intentBoundService = Intent(this, BoundService::class.java)
 
         viewModel.query.observe(this, {
             it?.let {
                 showUserFragment(it)
             }
         })
+
+        BoundService().randomNumberLiveData.observe(this, {
+            ToastHelper.showShort(this, "Random number: $it")
+        })
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_item, menu)
         return true
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unbindService(viewModel.serviceConnection)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -82,9 +104,12 @@ class MainActivity : BaseActivity() {
         svUser = findViewById(R.id.sv_search_user)
         svUser.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
-                query?.let {
+                query?.let { query ->
                     hideKeyboard()
-                    viewModel.onSearchQuerySubmitted(it)
+                    startBoundService()
+                    startService(intentService)
+//                    startForegroundService(intentFgService)
+//                    viewModel.onSearchQuerySubmitted(query)
                 }
                 return true
             }
@@ -93,5 +118,10 @@ class MainActivity : BaseActivity() {
                 return true
             }
         })
+    }
+
+    private fun startBoundService() {
+        bindService(intentBoundService, viewModel.serviceConnection, Context.BIND_AUTO_CREATE)
+        startService(intentBoundService)
     }
 }
