@@ -18,7 +18,14 @@
             android:name=".feature.service.BackgroundService"
             android:enabled="true"
             android:exported="false" />
-
+        <service
+            android:name=".feature.service.ForegroundService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".feature.service.BoundService"
+            android:enabled="true"
+            android:exported="false" />
         <activity
             android:name=".feature.user.view.savedUser.SavedUserActivity"
             android:parentActivityName=".feature.user.view.main.MainActivity" />

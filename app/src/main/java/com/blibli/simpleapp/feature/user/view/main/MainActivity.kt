@@ -1,11 +1,14 @@
 package com.blibli.simpleapp.feature.user.view.main
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
@@ -45,6 +48,8 @@ class MainActivity : BaseActivity() {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        setupNotificationChannel()
 
         initVar()
         intentService = Intent(this, BackgroundService::class.java)
@@ -106,9 +111,10 @@ class MainActivity : BaseActivity() {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 query?.let { query ->
                     hideKeyboard()
-                    startBoundService()
-                    startService(intentService)
+                                        startBoundService()
+                    //                    startService(intentService)
 //                    startForegroundService(intentFgService)
+//                    startService(intentFgService)
 //                    viewModel.onSearchQuerySubmitted(query)
                 }
                 return true
@@ -123,5 +129,17 @@ class MainActivity : BaseActivity() {
     private fun startBoundService() {
         bindService(intentBoundService, viewModel.serviceConnection, Context.BIND_AUTO_CREATE)
         startService(intentBoundService)
+    }
+
+    private fun setupNotificationChannel() {
+        val channel = NotificationChannel(
+            ForegroundService.CHANNEL_ID,
+            ForegroundService.CHANNEL_NAME,
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 }
