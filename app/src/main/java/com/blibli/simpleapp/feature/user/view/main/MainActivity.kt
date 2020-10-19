@@ -62,7 +62,8 @@ class MainActivity : BaseActivity() {
             }
         })
 
-        BoundService().randomNumberLiveData.observe(this, {
+        val boundService = BoundService()
+        boundService.randomNumberLiveData.observe(this, {
             ToastHelper.showShort(this, "Random number: $it")
         })
     }

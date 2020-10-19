@@ -23,10 +23,13 @@ class BoundService : Service() {
         ToastHelper.showShort(applicationContext, "Bound service is running!")
 
         generateRandomNumber = true
-        while (generateRandomNumber) {
-            val randomNumber = generator.nextInt(100)
-            randomNumberLiveData.value = randomNumber
-        }
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        val randomNumber = generator.nextInt(100)
+        randomNumberLiveData.value = randomNumber
+
+        return START_NOT_STICKY
     }
 
     override fun onBind(intent: Intent?): IBinder = binder
