@@ -3,6 +3,7 @@ package com.blibli.simpleapp.feature.user.view.detail
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -20,16 +21,13 @@ import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
 import com.google.android.material.textview.MaterialTextView
 import dagger.android.AndroidInjection
+import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
+@AndroidEntryPoint
 class DetailActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    private val viewModel: DetailViewModel by lazy {
-        ViewModelProviders.of(this, viewModelFactory).get(DetailViewModel::class.java)
-    }
+    private val viewModel: DetailViewModel by viewModels()
 
     private lateinit var tvUsername: MaterialTextView
     private lateinit var tvFollowing: MaterialTextView
@@ -40,8 +38,6 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var viewPager: ViewPager2
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AndroidInjection.inject(this)
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_detail)
 

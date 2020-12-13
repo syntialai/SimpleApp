@@ -1,6 +1,7 @@
 package com.blibli.simpleapp.feature.user.viewmodel
 
 import android.util.Log
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,10 +12,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-class DetailViewModel @Inject constructor(
-    private var repository: UserRepository
+class DetailViewModel @ViewModelInject constructor(
+    private var userRepository: UserRepository
 ) : ViewModel() {
 
     private val coroutineScope = CoroutineScope(Job() + Dispatchers.Main)
@@ -40,7 +40,7 @@ class DetailViewModel @Inject constructor(
         _username.value = username
 
         launchDataLoad {
-            repository.showUser(username).collect {
+            userRepository.showUser(username).collect {
                 _data.value = it
             }
         }
