@@ -1,24 +1,23 @@
 package com.blibli.simpleapp.feature.user.db.repository
 
-import android.app.Application
+import android.content.Context
 import android.util.Log
-import com.blibli.simpleapp.core.di.scope.UserScope
 import com.blibli.simpleapp.core.network.service.UserService
 import com.blibli.simpleapp.feature.user.db.builder.RoomDB
 import com.blibli.simpleapp.feature.user.db.model.User
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
 
-@UserScope
 class UserRepository @Inject constructor(
-    application: Application,
+    @ApplicationContext appContext: Context,
     private var userService: UserService
 ) {
 
-    private val userDAO = RoomDB.getDatabase(application).userDao()
+    private val userDAO = RoomDB.getDatabase(appContext).userDao()
 
     @ExperimentalCoroutinesApi
     suspend fun showUser(username: String) = flow {

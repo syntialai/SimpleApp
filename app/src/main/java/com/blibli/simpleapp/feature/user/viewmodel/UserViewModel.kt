@@ -1,6 +1,7 @@
 package com.blibli.simpleapp.feature.user.viewmodel
 
 import android.util.Log
+import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class UserViewModel @Inject constructor(
+class UserViewModel @ViewModelInject constructor(
     private var repository: UserRepository
 ) : ViewModel() {
 

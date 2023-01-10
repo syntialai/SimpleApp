@@ -1,14 +1,12 @@
 package com.blibli.simpleapp.feature.user.view.user
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,17 +16,12 @@ import com.blibli.simpleapp.feature.user.model.User
 import com.blibli.simpleapp.feature.user.view.detail.DetailActivity
 import com.blibli.simpleapp.feature.user.viewmodel.UserViewModel
 import com.google.android.material.textview.MaterialTextView
-import dagger.android.support.AndroidSupportInjection
-import javax.inject.Inject
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class UserFragment : Fragment() {
 
-    @Inject
-    lateinit var viewModelFactory: ViewModelProvider.Factory
-
-    private val viewModel: UserViewModel by lazy {
-        ViewModelProviders.of(this, viewModelFactory).get(UserViewModel::class.java)
-    }
+    private val viewModel: UserViewModel by viewModels()
 
     private var adapter = UserAdapter()
 
@@ -71,11 +64,6 @@ class UserFragment : Fragment() {
         }
 
         return view
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        AndroidSupportInjection.inject(this)
     }
 
     private fun setAdapter(userList: ArrayList<User>) {
